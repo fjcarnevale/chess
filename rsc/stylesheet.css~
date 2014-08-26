@@ -1,0 +1,65 @@
+td
+{
+   height:10%;
+   width:10%
+}
+
+.checker-light:hover,
+.checker-dark:hover
+{
+   background-color: #60BFFF;
+}
+
+.checker-light
+{
+   background-color: #FFAE52;
+}
+
+.checker-dark
+{
+   background-color: #B07A3C;
+}
+
+.checker-highlight
+{
+   background-color: #60BFFF;
+}
+
+.possible-move
+{
+   background-color: #80DFFF
+}
+
+.possible-move:hover
+{
+   background-color: #80FF80
+}
+
+.board-row
+{
+}
+
+.black-checker
+{
+
+   height: 80%;
+   width: 80%;
+   min-width: 1px;
+   min-height: 1px;
+   border-radius: 100%;
+   background-color: #111111;
+   margin: auto;
+   z-index: 100000;
+
+}
+
+.board
+{
+   height: 25vw;
+   width: 25vw;
+   margin-left: auto;
+   margin-right: auto;
+   margin-top: 5%;
+   
+   border-spacing: 2px;
+}
