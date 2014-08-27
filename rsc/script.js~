@@ -21,43 +21,59 @@ $(document).ready(function()
          
          $cell.addClass("possible-move");
       }
-
-      //$("table").effect("shake",{distance:5, times:2}, 250);
    });
    
-   $("button").click(function()
+   $("#new_game_button").click(function()
    {
-      $.get("/gamestatus",function(data)
-      {
-         var status = jQuery.parseJSON(data);
-         pieces = status["data"]["board"]["pieces"];
-         
-         var table = $("table tbody")[0];
-         
-
-         pieces.forEach(function(piece)
-         {
-            var cell = table.rows[piece["row"].cells[piece["col"];
-            var $cell = $(cell);
-            
-            var toAdd = $('<div/>');
-
-            if(piece["color"] == "black")
-            {
-               toAdd.addClass("black-checker");
-            }
-            else
-            {
-               toAdd.addClass("red-checker");
-            }
-         
-            $cell.append(toAdd);         
-
-         });
-      });
+      new_game();      
    });
    
 });
+
+function new_game()
+{
+   $(".piece").remove();
+
+   $.get("/newgame",function(data)
+   {
+      var json = jQuery.parseJSON(data);
+      var game_id = json["game_id"];
+      $("#game_id").html(game_id);
+      setup_board(game_id);
+   });
+}
+
+function setup_board(game_id)
+{
+   $.get("/getboard?game_id=" + game_id,function(data)
+   {
+      var json = jQuery.parseJSON(data);
+      pieces = json["board"]["pieces"];
+      
+      var table = $("table tbody")[0];
+
+      pieces.forEach(function(piece)
+      {
+         var cell = table.rows[piece["row"]].cells[piece["col"]];
+         var $cell = $(cell);
+         
+         var toAdd = $('<div/>');
+         toAdd.addClass("piece");
+
+         if(piece["color"] == "black")
+         {
+            toAdd.addClass("black-checker");
+         }
+         else
+         {
+            toAdd.addClass("red-checker");
+         }
+      
+         $cell.append(toAdd);         
+
+      });
+   });
+}
 
 function get_pawn_moves(color, row, col)
 {
@@ -71,27 +87,6 @@ function get_pawn_moves(color, row, col)
    else
    {
    
-   }
-   
-   return moves;
-}
-
-function get_rook_moves(row, col)
-{
-   var moves = [];
-   
-   for(var i=0; i < 8; i++)
-   {
-      if(i != row)
-      {
-         moves.push([i,col]);
-      }
-      
-      if(i != col)
-      {
-         moves.push([row,i]);
-      }
-      
    }
    
    return moves;

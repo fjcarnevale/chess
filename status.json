@@ -3,27 +3,8 @@
 	"success":true,
 	"data":
 	{
-      "id":"{{game.game_id}}",
-	   "state":"{{game.state}}",
-      "board":
-      {
-         {% set board = game.board %}
-         
-         "pieces":
-         [
-            {% for piece in board.pieces %}
-            {
-            
-               "name":"{{piece.name}}",
-               "row":"{{piece.row}}",
-               "col":"{{piece.col}}",
-               "color":"{{piece.color}}"
-            }
-            {% if not loop.last %},{% endif %}
-            {% endfor %}
-         ]
-      }
-
+      "game_id":"{{game.game_id}}",
+	   "state":"{{game.state}}"
 	}
 }
 {% endautoescape %}

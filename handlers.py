@@ -38,14 +38,69 @@ class Index(BaseHandler):
       template = JINJA_ENVIRONMENT.get_template('index.html')
       self.response.write(template.render())
 
-
-class GameStatus(BaseHandler):
+class NewGame(BaseHandler):
    def get(self):
       game = chess.Game.new_checker_game();
 
       template_values = {"game":game}
+      template = JINJA_ENVIRONMENT.get_template('newgame.json')
+      self.response.write(template.render(template_values))
+
+class GameStatus(BaseHandler):
+   def get(self):
+      game_id = self.request.get("game_id");
+      game = chess.Game.get_by_id(game_id)
+   
+      template_values = {"game":game}
       template = JINJA_ENVIRONMENT.get_template('status.json')
       self.response.write(template.render(template_values))
+
+class GetBoard(BaseHandler):
+   def get(self):
+      game_id = self.request.get("game_id");
+      game = chess.Game.get_by_id(game_id)
+
+      template_values = {"board":game.board}
+      template = JINJA_ENVIRONMENT.get_template('board.json')
+      self.response.write(template.render(template_values))
+
+class Move(BaseHandler):
+   def get(self):
+      pass
+
+class ChooseSide(BaseHandler):
+   def get(self):
+      pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

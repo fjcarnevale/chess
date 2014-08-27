@@ -1,4 +1,28 @@
-td
+.controls
+{
+   margin-left: 50%;
+   margin-right: 50%;
+   display: inline;
+   font-size: 16px;
+}
+
+.controls select
+{
+   background: transparent;
+   width: auto;
+   padding: 3px;
+   line-height: 1;
+   height: 30px;
+}
+
+.controls button
+{
+   background: transparent;
+   width: auto;
+   padding: 3px;
+   height: 30px;
+}
+.board td
 {
    height:10%;
    width:10%
@@ -48,6 +72,20 @@ td
    min-height: 1px;
    border-radius: 100%;
    background-color: #111111;
+   margin: auto;
+   z-index: 100000;
+
+}
+
+.red-checker
+{
+
+   height: 80%;
+   width: 80%;
+   min-width: 1px;
+   min-height: 1px;
+   border-radius: 100%;
+   background-color: #EE1111;
    margin: auto;
    z-index: 100000;
 

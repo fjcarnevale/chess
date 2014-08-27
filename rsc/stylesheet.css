@@ -1,4 +1,27 @@
-td
+.controls
+{
+   margin-left: 30%;
+   display: inline;
+   font-size: 16px;
+}
+
+.controls select
+{
+   background: transparent;
+   width: auto;
+   padding: 3px;
+   line-height: 1;
+   height: 30px;
+}
+
+.controls button
+{
+   background: transparent;
+   width: auto;
+   padding: 3px;
+   height: 30px;
+}
+.board td
 {
    height:10%;
    width:10%

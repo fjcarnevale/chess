@@ -8,7 +8,22 @@
         <script type="text/javascript" src="/rsc/script.js"></script>
 	</head>
 	<body>
-      <button type="button">setup game</button>
+      
+      <div class="controls">
+         <button id="new_game_button">New Game</button>
+         <button id="join_game_button">Join Game</button>
+         <input type="text" id="game_id_input" placeholder="Game ID"></input>
+         <input type="text" id="player_name" placeholder="Player Name"></input>
+         <select id="side">
+	         <option value="black" selected>Black</option>
+	         <option value="red">Red</option>
+         </select>
+         <button id="ready_button">Ready</button>
+
+      </div>
+
+      <center><div id="game_id"></div></center>
+
       <div>
          <table class="board">
             <tr class="board-row">

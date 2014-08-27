@@ -1,0 +1,20 @@
+{% autoescape true %}
+{
+	"board":
+      {  
+         "pieces":
+         [
+            {% for piece in board.pieces %}
+            {
+            
+               "name":"{{piece.name}}",
+               "row":"{{piece.row}}",
+               "col":"{{piece.col}}",
+               "color":"{{piece.color}}"
+            }
+            {% if not loop.last %},{% endif %}
+            {% endfor %}
+         ]
+      }
+}
+{% endautoescape %}

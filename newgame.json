@@ -1,0 +1,6 @@
+{% autoescape true %}
+{
+	"success":"true",
+	"game_id":"{{game.game_id}}"
+}
+{% endautoescape %}
