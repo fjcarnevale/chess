@@ -1,10 +1,16 @@
 {% autoescape true %}
 {
-	"success":true,
-	"data":
-	{
-      "game_id":"{{game.game_id}}",
-	   "state":"{{game.state}}"
-	}
+   "game_id":"{{game.game_id}}",
+   "state":"{{game.state}}",
+   "players":[
+      {% for player in game.players %}
+      {
+      
+         "name":"{{player.name}}",
+         "color":"{{player.color}}"
+      }
+      {% if not loop.last %},{% endif %}
+      {% endfor %}
+   ]
 }
 {% endautoescape %}

@@ -12,7 +12,7 @@ application = webapp2.WSGIApplication([
    ('/gamestatus', handlers.GameStatus),
    ('/getboard', handlers.GetBoard),
    ('/move', handlers.Move),
-   ('/chooseside', handlers.ChooseSide)
+   ('/addplayer', handlers.AddPlayer)
 ], config=config, debug=True)
 
 

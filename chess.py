@@ -52,12 +52,22 @@ class Board(ndb.Model):
 
       return board
 
+class Player(ndb.Model):
+   name = ndb.StringProperty()
+   color = ndb.StringProperty()
+
 class Game(ndb.Model):
    game_id = ndb.StringProperty()
    state = ndb.StringProperty()
    board = ndb.StructuredProperty(Board)
-   player_1 = ndb.StringProperty()
-   player_2 = ndb.StringProperty()
+   players = ndb.StructuredProperty(Player, repeated=True)
+
+   def add_player(self,name,color):
+      player = Player()
+      player.name = name
+      player.color = color
+      self.players.append(player)
+      self.put()
 
    @staticmethod
    def get_by_id(game_id):
@@ -72,8 +82,7 @@ class Game(ndb.Model):
       game.game_id = game_id
       game.state = "pregame"
       game.board = Board.new_checker_board();
-      game.player_1 = ""
-      game.player_2 = ""
+      game.players = []
       game.put()
 
       return game
