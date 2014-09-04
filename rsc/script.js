@@ -36,6 +36,11 @@ $(document).ready(function()
       var player_color = $("#player_color").val();
       add_player(player_name, player_color);
    });
+
+   $("#join_game_button").click(function()
+   {
+      join_game();
+   });
    
 });
 
@@ -52,6 +57,18 @@ function new_game()
       update_status(game_id);
       setup_board(game_id);
    });
+}
+
+function join_game()
+{
+   $(".piece").remove();
+
+   current_game_id = $("#game_id_input").val();
+   alert(current_game_id);
+
+
+   update_status(current_game_id);
+   setup_board(current_game_id);
 }
 
 function add_player(name,color)
@@ -82,7 +99,21 @@ function update_status(game_id)
 {
    $.get("/gamestatus?game_id="+game_id, function(data)
    {
+      alert(data);
       var json = jQuery.parseJSON(data);
+      var players = json["players"];
+      
+      players.forEach(function(player)
+      {
+         if(player["color"] == "red")
+         {
+            $("#red_player_name").html(player["name"]);
+         }
+         else
+         {
+            $("#black_player_name").html(player["name"]);
+         }
+      });
       
    });
 }
