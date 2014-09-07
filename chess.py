@@ -61,6 +61,7 @@ class Game(ndb.Model):
    state = ndb.StringProperty()
    board = ndb.StructuredProperty(Board)
    players = ndb.StructuredProperty(Player, repeated=True)
+   turn = ndb.StringProperty()
 
    def add_player(self,name,color):
       player = Player()
@@ -83,6 +84,7 @@ class Game(ndb.Model):
       game.state = "pregame"
       game.board = Board.new_checker_board();
       game.players = []
+      game.turn = ""
       game.put()
 
       return game

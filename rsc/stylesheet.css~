@@ -1,7 +1,6 @@
 .controls
 {
-   margin-left: 50%;
-   margin-right: 50%;
+   margin-left: 30%;
    display: inline;
    font-size: 16px;
 }
@@ -26,6 +25,13 @@
 {
    height:10%;
    width:10%
+}
+
+.turn
+{
+   border-width: 2px;
+   border-color: #FFFFFF;
+   border-style: solid;
 }
 
 .checker-light:hover,

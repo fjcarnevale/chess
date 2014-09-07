@@ -27,6 +27,13 @@
    width:10%
 }
 
+.turn
+{
+   border-width: 2px;
+   border-color: #F5D905;
+   border-style: solid;
+}
+
 .checker-light:hover,
 .checker-dark:hover
 {

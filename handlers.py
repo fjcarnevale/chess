@@ -78,6 +78,13 @@ class AddPlayer(BaseHandler):
 
       game.add_player(name,color)
 
+      # TODO this should really be in a controller class
+      # or it should go into the subclasses for chess / checkers in a start game method
+      if len(game.players) == 2:
+         game.state = "playing"
+         game.turn = "red"
+         game.put()
+
       template_values = {"game":game}
       template = JINJA_ENVIRONMENT.get_template('status.json')
       self.response.write(template.render(template_values))

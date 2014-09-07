@@ -1,4 +1,8 @@
 var current_game_id = "";
+var player_name = "";
+var player_color = "";
+var turn = "";
+var refresh = 0;
 
 $(document).ready(function()
 {
@@ -44,6 +48,26 @@ $(document).ready(function()
    
 });
 
+function refresh_game_status()
+{
+   if(refresh)
+   {
+      update_status(current_game_id);
+      start_refresh_timer();
+   }
+}
+
+function start_refresh_timer()
+{
+   refresh = 1;
+   setTimeout(refresh_game_status, 10000);
+}
+
+function stop_refresh_timer()
+{
+   refresh = 0;
+}
+
 function new_game()
 {
    $(".piece").remove();
@@ -56,6 +80,7 @@ function new_game()
       $("#game_id").html(game_id);
       update_status(game_id);
       setup_board(game_id);
+      start_refresh_timer();
    });
 }
 
@@ -64,8 +89,6 @@ function join_game()
    $(".piece").remove();
 
    current_game_id = $("#game_id_input").val();
-   alert(current_game_id);
-
 
    update_status(current_game_id);
    setup_board(current_game_id);
@@ -74,10 +97,12 @@ function join_game()
 function add_player(name,color)
 {
    $("#ready_button").prop( "disabled", true );
+
+   player_name = name;
+   player_color = color;
    
    $.get("/addplayer?game_id=" + current_game_id + "&name=" + name + "&color=" + color, function(data)
    {
-      alert(data);
       var json = jQuery.parseJSON(data);
       var players = json["players"];
       
@@ -92,6 +117,21 @@ function add_player(name,color)
             $("#black_player_name").html(player["name"]);
          }
       });
+
+      if(json["state"] == "playing")
+      {
+         if(json["turn"] == "black")
+         {
+            $("#black_player_name").addClass("turn");
+            $("#red_player_name").removeClass("turn");
+         }
+         else if(json["turn"] == "red")
+         {
+            $("#black_player_name").removeClass("turn");
+            $("#red_player_name").addClass("turn");
+         }
+      }
+      
    });
 }
 
@@ -99,7 +139,6 @@ function update_status(game_id)
 {
    $.get("/gamestatus?game_id="+game_id, function(data)
    {
-      alert(data);
       var json = jQuery.parseJSON(data);
       var players = json["players"];
       
@@ -114,6 +153,21 @@ function update_status(game_id)
             $("#black_player_name").html(player["name"]);
          }
       });
+
+      if(json["state"] == "playing")
+      {
+         turn = json["turn"];
+         if(turn == "black")
+         {
+            $("#black_player_name").addClass("turn");
+            $("#red_player_name").removeClass("turn");
+         }
+         else if(turn == "red")
+         {
+            $("#black_player_name").removeClass("turn");
+            $("#red_player_name").addClass("turn");
+         }
+      }
       
    });
 }

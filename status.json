@@ -11,6 +11,7 @@
       }
       {% if not loop.last %},{% endif %}
       {% endfor %}
-   ]
+   ],
+   "turn":"{{game.turn}}"
 }
 {% endautoescape %}
