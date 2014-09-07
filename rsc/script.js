@@ -2,6 +2,9 @@ var current_game_id = "";
 var player_name = "";
 var player_color = "";
 var turn = "";
+var black_pieces = [];
+var red_pieces = [];
+var piece_to_move = null;
 var refresh = 0;
 
 $(document).ready(function()
@@ -11,12 +14,28 @@ $(document).ready(function()
       $("td").removeClass("checker-highlight");
       $("td").removeClass("possible-move");
       
-      $(this).addClass("checker-highlight");
+      //$(this).addClass("checker-highlight");
    
       var myCol = $(this).index();
       var $tr = $(this).closest('tr');
       var myRow = $tr.index();
 
+      var piece = find_piece(player_color,myRow,myCol);
+
+      if(piece != null)
+      {
+         var table = $("table tbody")[0];
+         var cell = table.rows[myRow].cells[myCol]; // This is a DOM "TD" element
+         var $cell = $(cell); // Now it's a jQuery object.
+         
+         $cell.addClass("checker-highlight");
+      }
+      else
+      {
+         piece_to_move = null;
+      }
+ 
+      /*
       moves = get_pawn_moves(myRow, myCol);
       
       for (var i = 0; i < moves.length; i++)
@@ -27,6 +46,7 @@ $(document).ready(function()
          
          $cell.addClass("possible-move");
       }
+      */
    });
    
    $("#new_game_button").click(function()
@@ -47,6 +67,32 @@ $(document).ready(function()
    });
    
 });
+
+function find_piece(color, row, col)
+{
+   var pieces;
+   var found_piece = null;
+
+   if(color == "black")
+   {
+      pieces = black_pieces;
+   }
+   else
+   {
+      pieces = red_pieces;
+   }
+
+   for(var i=0; i<pieces.length; i++)
+   {
+      if(pieces[i]["row"] == row && pieces[i]["col"] == col)
+      {
+         found_piece = pieces[i];
+         break;
+      }
+   }
+
+   return found_piece;
+}
 
 function refresh_game_status()
 {
@@ -191,10 +237,12 @@ function setup_board(game_id)
 
          if(piece["color"] == "black")
          {
+            black_pieces.push(piece);
             toAdd.addClass("black-checker");
          }
          else
          {
+            red_pieces.push(piece);
             toAdd.addClass("red-checker");
          }
       
