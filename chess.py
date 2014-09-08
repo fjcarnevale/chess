@@ -18,14 +18,24 @@ class Piece(ndb.Model):
    
 class Move(ndb.Model):
    name = ndb.StringProperty();
-   row_source = ndb.IntegerProperty()
-   col_source = ndb.IntegerProperty()
-   row_dest = ndb.IntegerProperty()
-   col_dest = ndb.IntegerProperty()
+   src_row = ndb.IntegerProperty()
+   src_col = ndb.IntegerProperty()
+   dest_row = ndb.IntegerProperty()
+   dest_col = ndb.IntegerProperty()
 
 class Board(ndb.Model):
    pieces = ndb.StructuredProperty(Piece, repeated=True)
    moves = ndb.StructuredProperty(Move, repeated=True)
+
+   def move_piece(self,src_row,src_col,dest_row,dest_col):
+      for index,piece in enumerate(self.pieces):
+         if piece.row == src_row and piece.col == src_col:
+            piece.row = dest_row
+            piece.col = dest_col
+            self.pieces[index] = piece
+            return
+
+      print "couldn't find piece"
 
    @staticmethod
    def new_checker_board():
@@ -62,6 +72,7 @@ class Game(ndb.Model):
    board = ndb.StructuredProperty(Board)
    players = ndb.StructuredProperty(Player, repeated=True)
    turn = ndb.StringProperty()
+   last_move = ndb.StructuredProperty(Move)
 
    def add_player(self,name,color):
       player = Player()
@@ -69,6 +80,24 @@ class Game(ndb.Model):
       player.color = color
       self.players.append(player)
       self.put()
+
+   def move_piece(self,src_row,src_col,dest_row,dest_col):
+      self.board.move_piece(src_row,src_col,dest_row,dest_col)
+
+      self.last_move = Move()
+      self.last_move.src_row = src_row
+      self.last_move.src_col = src_col
+      self.last_move.dest_row = dest_row
+      self.last_move.dest_col = dest_col
+      self.last_move.name = self.turn
+
+      if self.turn == "red":
+         self.turn = "black"
+      else:
+         self.turn = "red"
+      self.put()
+
+   
 
    @staticmethod
    def get_by_id(game_id):
@@ -85,6 +114,7 @@ class Game(ndb.Model):
       game.board = Board.new_checker_board();
       game.players = []
       game.turn = ""
+      game.last_move = None
       game.put()
 
       return game

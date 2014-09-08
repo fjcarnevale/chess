@@ -13,5 +13,16 @@
       {% endfor %}
    ],
    "turn":"{{game.turn}}"
+   {% if game.last_move is defined %}
+   ,
+   "last_move":
+   {
+      "name":"{{game.last_move.name}}",
+      "src_row":"{{game.last_move.src_row}}",
+      "src_col":"{{game.last_move.src_col}}",
+      "dest_row":"{{game.last_move.dest_row}}",
+      "dest_col":"{{game.last_move.dest_col}}"
+   }
+   {% endif %}
 }
 {% endautoescape %}

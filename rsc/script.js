@@ -4,6 +4,7 @@ var player_color = "";
 var turn = "";
 var black_pieces = [];
 var red_pieces = [];
+var move_history = [];
 var piece_to_move = null;
 var refresh = 0;
 
@@ -11,42 +12,35 @@ $(document).ready(function()
 {
    $('td').click(function()
    {
+
       $("td").removeClass("checker-highlight");
-      $("td").removeClass("possible-move");
-      
-      //$(this).addClass("checker-highlight");
-   
+
       var myCol = $(this).index();
       var $tr = $(this).closest('tr');
       var myRow = $tr.index();
 
       var piece = find_piece(player_color,myRow,myCol);
 
-      if(piece != null)
+      if(piece_to_move != null && piece == null)
       {
+         alert("moving piece");
+         move_piece(piece_to_move,myRow,myCol);
+      }
+      else if (piece != null)
+      {
+         alert("highlighting piece");
          var table = $("table tbody")[0];
          var cell = table.rows[myRow].cells[myCol]; // This is a DOM "TD" element
          var $cell = $(cell); // Now it's a jQuery object.
+         piece_to_move = piece;
          
          $cell.addClass("checker-highlight");
       }
       else
       {
+         alert("deselecting piece");
          piece_to_move = null;
       }
- 
-      /*
-      moves = get_pawn_moves(myRow, myCol);
-      
-      for (var i = 0; i < moves.length; i++)
-      {
-         var table = $("table tbody")[0];
-         var cell = table.rows[moves[i][0]].cells[moves[i][1]]; // This is a DOM "TD" element
-         var $cell = $(cell); // Now it's a jQuery object.
-         
-         $cell.addClass("possible-move");
-      }
-      */
    });
    
    $("#new_game_button").click(function()
@@ -67,6 +61,21 @@ $(document).ready(function()
    });
    
 });
+
+function move_piece(piece, row, col)
+{
+   var endpoint = "/move?game_id=" + current_game_id;
+   endpoint += "&src_row=" + piece["row"];
+   endpoint += "&src_col=" + piece["col"];
+   endpoint += "&dest_row=" + row;
+   endpoint += "&dest_col=" + col;
+   alert(endpoint);
+   $.get(endpoint,function(data)
+   {
+      //var json = jQuery.parseJSON(data);
+      alert(data);
+   });
+}
 
 function find_piece(color, row, col)
 {

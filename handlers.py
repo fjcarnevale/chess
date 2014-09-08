@@ -66,7 +66,20 @@ class GetBoard(BaseHandler):
 
 class Move(BaseHandler):
    def get(self):
-      pass
+      game_id = self.request.get("game_id")
+      game = chess.Game.get_by_id(game_id)
+
+      src_row = int(self.request.get("src_row"))
+      src_col = int(self.request.get("src_col"))
+      dest_row = int(self.request.get("dest_row"))
+      dest_col = int(self.request.get("dest_col"))
+
+      game.move_piece(src_row, src_col, dest_row, dest_col)
+
+      template_values = {"game":game}
+      template = JINJA_ENVIRONMENT.get_template('status.json')
+      self.response.write(template.render(template_values))
+      
 
 class AddPlayer(BaseHandler):
    def get(self):
