@@ -73,11 +73,13 @@ class Game(ndb.Model):
    players = ndb.StructuredProperty(Player, repeated=True)
    turn = ndb.StringProperty()
    last_move = ndb.StructuredProperty(Move)
+   open_spots = ndb.StringProperty(repeated=True)
 
    def add_player(self,name,color):
       player = Player()
       player.name = name
       player.color = color
+      self.open_spots.remove(color);
       self.players.append(player)
       self.put()
 
@@ -115,6 +117,7 @@ class Game(ndb.Model):
       game.players = []
       game.turn = ""
       game.last_move = None
+      game.open_spots = ["red","black"]
       game.put()
 
       return game

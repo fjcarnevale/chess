@@ -135,7 +135,7 @@ function new_game()
       $("#game_id").html(game_id);
       update_status(game_id);
       setup_board(game_id);
-      start_refresh_timer();
+      //start_refresh_timer();
    });
 }
 
@@ -194,6 +194,7 @@ function update_status(game_id)
 {
    $.get("/gamestatus?game_id="+game_id, function(data)
    {
+      console.log(data);
       var json = jQuery.parseJSON(data);
       var players = json["players"];
       
@@ -224,6 +225,39 @@ function update_status(game_id)
          }
       }
       
+      var open_spots = [];
+
+      json["open_spots"].forEach(function(element)
+      {
+         open_spots.push(element["spot"]);
+      });
+
+      var current_spots = [];
+      $("#player_color option").each(function()
+      {
+          current_spots.push($(this).val());
+      });
+
+      open_spots.forEach(function(spot)
+      {
+         if(current_spots.indexOf(spot) < 0)
+         {
+            console.log("adding " + spot);
+            $('#player_color')
+               .append($("<option></option>")
+               .attr("value",spot)
+               .text(spot));
+         }
+      });
+
+      current_spots.forEach(function(spot)
+      {
+         if(open_spots.indexOf(spot) < 0)
+         {
+            console.log("removing " + spot);
+            $("#player_color option[value='"+spot+"']").remove();
+         }
+      });
    });
 }
 
