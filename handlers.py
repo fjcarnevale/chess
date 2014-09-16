@@ -85,6 +85,8 @@ class Move(BaseHandler):
 
       game.move_piece(src_row, src_col, dest_row, dest_col)
 
+      print game.last_move.src_row;
+
       template_values = {"game":game}
       template = JINJA_ENVIRONMENT.get_template('status.json')
       self.response.write(template.render(template_values))

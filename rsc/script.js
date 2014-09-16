@@ -7,6 +7,7 @@ var red_pieces = [];
 var move_history = [];
 var piece_to_move = null;
 var refresh = 0;
+var last_move_number = 0;
 
 $(document).ready(function()
 {
@@ -72,8 +73,25 @@ function move_piece(piece, row, col)
    alert(endpoint);
    $.get(endpoint,function(data)
    {
-      //var json = jQuery.parseJSON(data);
       alert(data);
+      var json = jQuery.parseJSON(data);
+      var last_move = json["last_move"];
+
+      var src_row = last_move["src_row"];
+      var src_col = last_move["src_col"];
+      var dest_row = last_move["dest_row"];
+      var dest_col = last_move["dest_col"];
+
+      for(var i=0; i<pieces.length; i++)
+      {
+         if(pieces[i]["row"] == src_row && pieces[i]["col"] == src_col)
+         {
+            pieces[i]["row"] = dest_row;
+            pieces[i]["col"] = dest_col;
+            refresh_board();
+            break;
+         }
+      }
    });
 }
 
@@ -273,6 +291,29 @@ function update_status(game_id)
             $("#red_player_name").addClass("turn");
          }
       }
+
+      if(json["last_move"] != null && json["last_move"]["number"] > last_move_number)
+      {
+         alert("new move!");
+
+         var last_move = json["last_move"];
+
+         var src_row = last_move["src_row"];
+         var src_col = last_move["src_col"];
+         var dest_row = last_move["dest_row"];
+         var dest_col = last_move["dest_col"];
+
+         for(var i=0; i<pieces.length; i++)
+         {
+            if(pieces[i]["row"] == src_row && pieces[i]["col"] == src_col)
+            {
+               pieces[i]["row"] = dest_row;
+               pieces[i]["col"] = dest_col;
+               refresh_board();
+               break;
+            }
+         }
+      }
    });
 }
 
@@ -283,30 +324,37 @@ function setup_board(game_id)
       var json = jQuery.parseJSON(data);
       pieces = json["board"]["pieces"];
       
-      var table = $("table tbody")[0];
+      refresh_board();      
+   });
+}
 
-      pieces.forEach(function(piece)
-      {
-         var cell = table.rows[piece["row"]].cells[piece["col"]];
-         var $cell = $(cell);
-         
-         var toAdd = $('<div/>');
-         toAdd.addClass("piece");
+function refresh_board()
+{
+   $(".piece").remove();
 
-         if(piece["color"] == "black")
-         {
-            black_pieces.push(piece);
-            toAdd.addClass("black-checker");
-         }
-         else
-         {
-            red_pieces.push(piece);
-            toAdd.addClass("red-checker");
-         }
+   var table = $("table tbody")[0];
+
+   pieces.forEach(function(piece)
+   {
+      var cell = table.rows[piece["row"]].cells[piece["col"]];
+      var $cell = $(cell);
       
-         $cell.append(toAdd);         
+      var toAdd = $('<div/>');
+      toAdd.addClass("piece");
 
-      });
+      if(piece["color"] == "black")
+      {
+         black_pieces.push(piece);
+         toAdd.addClass("black-checker");
+      }
+      else
+      {
+         red_pieces.push(piece);
+         toAdd.addClass("red-checker");
+      }
+   
+      $cell.append(toAdd);         
+
    });
 }
 

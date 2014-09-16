@@ -93,6 +93,8 @@ class Game(ndb.Model):
       self.last_move.dest_col = dest_col
       self.last_move.name = self.turn
 
+      self.board.moves.append(self.last_move);
+
       if self.turn == "red":
          self.turn = "black"
       else:
