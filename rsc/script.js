@@ -107,6 +107,7 @@ function refresh_game_status()
 {
    if(refresh)
    {
+      update_players(current_game_id);
       update_status(current_game_id);
       start_refresh_timer();
    }
@@ -134,8 +135,9 @@ function new_game()
       current_game_id = game_id;
       $("#game_id").html(game_id);
       update_status(game_id);
+      update_players(game_id);
       setup_board(game_id);
-      //start_refresh_timer();
+      start_refresh_timer();
    });
 }
 
@@ -146,7 +148,9 @@ function join_game()
    current_game_id = $("#game_id_input").val();
 
    update_status(current_game_id);
+   update_players(current_game_id);
    setup_board(current_game_id);
+   start_refresh_timer();
 }
 
 function add_player(name,color)
@@ -190,9 +194,9 @@ function add_player(name,color)
    });
 }
 
-function update_status(game_id)
+function update_players(game_id)
 {
-   $.get("/gamestatus?game_id="+game_id, function(data)
+   $.get("/players?game_id="+game_id, function(data)
    {
       console.log(data);
       var json = jQuery.parseJSON(data);
@@ -209,21 +213,6 @@ function update_status(game_id)
             $("#black_player_name").html(player["name"]);
          }
       });
-
-      if(json["state"] == "playing")
-      {
-         turn = json["turn"];
-         if(turn == "black")
-         {
-            $("#black_player_name").addClass("turn");
-            $("#red_player_name").removeClass("turn");
-         }
-         else if(turn == "red")
-         {
-            $("#black_player_name").removeClass("turn");
-            $("#red_player_name").addClass("turn");
-         }
-      }
       
       var open_spots = [];
 
@@ -245,6 +234,7 @@ function update_status(game_id)
             console.log("adding " + spot);
             $('#player_color')
                .append($("<option></option>")
+
                .attr("value",spot)
                .text(spot));
          }
@@ -261,9 +251,34 @@ function update_status(game_id)
    });
 }
 
+function update_status(game_id)
+{
+   $.get("/gamestatus?game_id="+game_id, function(data)
+   {
+      console.log(data);
+      var json = jQuery.parseJSON(data);
+      var players = json["players"];
+
+      if(json["state"] == "playing")
+      {
+         turn = json["turn"];
+         if(turn == "black")
+         {
+            $("#black_player_name").addClass("turn");
+            $("#red_player_name").removeClass("turn");
+         }
+         else if(turn == "red")
+         {
+            $("#black_player_name").removeClass("turn");
+            $("#red_player_name").addClass("turn");
+         }
+      }
+   });
+}
+
 function setup_board(game_id)
 {
-   $.get("/getboard?game_id=" + game_id,function(data)
+   $.get("/board?game_id=" + game_id,function(data)
    {
       var json = jQuery.parseJSON(data);
       pieces = json["board"]["pieces"];

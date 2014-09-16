@@ -1,0 +1,21 @@
+{% autoescape true %}
+{
+   "game_id":"{{game.game_id}}",
+   "players":[
+      {% for player in game.players %}
+      {
+      
+         "name":"{{player.name}}",
+         "color":"{{player.color}}"
+      }
+      {% if not loop.last %},{% endif %}
+      {% endfor %}
+   ],
+   "open_spots":[
+      {% for spot in game.open_spots %}
+      {"spot":"{{spot}}"}
+      {% if not loop.last %},{% endif %}
+      {% endfor %}
+   ]
+}
+{% endautoescape %}

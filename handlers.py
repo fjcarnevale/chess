@@ -55,13 +55,22 @@ class GameStatus(BaseHandler):
       template = JINJA_ENVIRONMENT.get_template('status.json')
       self.response.write(template.render(template_values))
 
-class GetBoard(BaseHandler):
+class Board(BaseHandler):
    def get(self):
       game_id = self.request.get("game_id")
       game = chess.Game.get_by_id(game_id)
 
       template_values = {"board":game.board}
       template = JINJA_ENVIRONMENT.get_template('board.json')
+      self.response.write(template.render(template_values))
+
+class Players(BaseHandler):
+   def get(self):
+      game_id = self.request.get("game_id")
+      game = chess.Game.get_by_id(game_id)
+   
+      template_values = {"game":game}
+      template = JINJA_ENVIRONMENT.get_template('players.json')
       self.response.write(template.render(template_values))
 
 class Move(BaseHandler):
@@ -99,7 +108,7 @@ class AddPlayer(BaseHandler):
          game.put()
 
       template_values = {"game":game}
-      template = JINJA_ENVIRONMENT.get_template('status.json')
+      template = JINJA_ENVIRONMENT.get_template('players.json')
       self.response.write(template.render(template_values))
 
 

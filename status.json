@@ -1,24 +1,11 @@
 {% autoescape true %}
 {
    "game_id":"{{game.game_id}}",
+
    "state":"{{game.state}}",
-   "players":[
-      {% for player in game.players %}
-      {
-      
-         "name":"{{player.name}}",
-         "color":"{{player.color}}"
-      }
-      {% if not loop.last %},{% endif %}
-      {% endfor %}
-   ],
-   "turn":"{{game.turn}}",
-   "open_spots":[
-      {% for spot in game.open_spots %}
-      {"spot":"{{spot}}"}
-      {% if not loop.last %},{% endif %}
-      {% endfor %}
-   ]
+
+   "turn":"{{game.turn}}"
+
    {% if game.last_move is defined %}
    ,
    "last_move":

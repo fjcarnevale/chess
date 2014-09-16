@@ -10,7 +10,8 @@ application = webapp2.WSGIApplication([
 	('/', handlers.Index),
    ('/newgame', handlers.NewGame),
    ('/gamestatus', handlers.GameStatus),
-   ('/getboard', handlers.GetBoard),
+   ('/board', handlers.Board),
+   ('/players', handlers.Players),
    ('/move', handlers.Move),
    ('/addplayer', handlers.AddPlayer)
 ], config=config, debug=True)
