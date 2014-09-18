@@ -17,11 +17,12 @@ class Piece(ndb.Model):
    color = ndb.StringProperty()
    
 class Move(ndb.Model):
-   name = ndb.StringProperty();
+   name = ndb.StringProperty()
    src_row = ndb.IntegerProperty()
    src_col = ndb.IntegerProperty()
    dest_row = ndb.IntegerProperty()
    dest_col = ndb.IntegerProperty()
+   number = ndb.IntegerProperty()
 
 class Board(ndb.Model):
    pieces = ndb.StructuredProperty(Piece, repeated=True)
@@ -92,6 +93,7 @@ class Game(ndb.Model):
       self.last_move.dest_row = dest_row
       self.last_move.dest_col = dest_col
       self.last_move.name = self.turn
+      self.last_move.number = len(self.board.moves) + 1
 
       self.board.moves.append(self.last_move);
 

@@ -27,10 +27,16 @@
    width:10%
 }
 
+.player_name
+{
+   margin-left: auto;
+   margin-right: auto;
+}
+
 .turn
 {
    border-width: 2px;
-   border-color: #FFFFFF;
+   border-color: #F5D905;
    border-style: solid;
 }
 

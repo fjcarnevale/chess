@@ -10,7 +10,7 @@
    ,
    "last_move":
    {
-      "number":"{{game.board.moves|length}}",
+      "number":"{{game.last_move.number}}",
       "name":"{{game.last_move.name}}",
       "src_row":"{{game.last_move.src_row}}",
       "src_col":"{{game.last_move.src_col}}",

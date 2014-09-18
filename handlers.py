@@ -43,7 +43,7 @@ class NewGame(BaseHandler):
       game = chess.Game.new_checker_game()
 
       template_values = {"game":game}
-      template = JINJA_ENVIRONMENT.get_template('newgame.json')
+      template = JINJA_ENVIRONMENT.get_template('json/newgame.json')
       self.response.write(template.render(template_values))
 
 class GameStatus(BaseHandler):
@@ -52,7 +52,7 @@ class GameStatus(BaseHandler):
       game = chess.Game.get_by_id(game_id)
    
       template_values = {"game":game}
-      template = JINJA_ENVIRONMENT.get_template('status.json')
+      template = JINJA_ENVIRONMENT.get_template('json/status.json')
       self.response.write(template.render(template_values))
 
 class Board(BaseHandler):
@@ -61,7 +61,7 @@ class Board(BaseHandler):
       game = chess.Game.get_by_id(game_id)
 
       template_values = {"board":game.board}
-      template = JINJA_ENVIRONMENT.get_template('board.json')
+      template = JINJA_ENVIRONMENT.get_template('json/board.json')
       self.response.write(template.render(template_values))
 
 class Players(BaseHandler):
@@ -70,7 +70,7 @@ class Players(BaseHandler):
       game = chess.Game.get_by_id(game_id)
    
       template_values = {"game":game}
-      template = JINJA_ENVIRONMENT.get_template('players.json')
+      template = JINJA_ENVIRONMENT.get_template('json/players.json')
       self.response.write(template.render(template_values))
 
 class Move(BaseHandler):
@@ -85,10 +85,8 @@ class Move(BaseHandler):
 
       game.move_piece(src_row, src_col, dest_row, dest_col)
 
-      print game.last_move.src_row;
-
-      template_values = {"game":game}
-      template = JINJA_ENVIRONMENT.get_template('status.json')
+      template_values = {"game":game, "move":game.last_move, "success":True}
+      template = JINJA_ENVIRONMENT.get_template('json/move.json')
       self.response.write(template.render(template_values))
       
 
@@ -110,7 +108,7 @@ class AddPlayer(BaseHandler):
          game.put()
 
       template_values = {"game":game}
-      template = JINJA_ENVIRONMENT.get_template('players.json')
+      template = JINJA_ENVIRONMENT.get_template('json/players.json')
       self.response.write(template.render(template_values))
 
 

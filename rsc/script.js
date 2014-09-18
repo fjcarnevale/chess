@@ -11,27 +11,26 @@ var last_move_number = 0;
 
 $(document).ready(function()
 {
+   // Function to handle clicking squares on the board
    $('td').click(function()
    {
 
       $("td").removeClass("checker-highlight");
 
-      var myCol = $(this).index();
+      var col = $(this).index();
       var $tr = $(this).closest('tr');
-      var myRow = $tr.index();
+      var row = $tr.index();
 
-      var piece = find_piece(player_color,myRow,myCol);
+      var piece = find_piece(player_color,row,col);
 
       if(piece_to_move != null && piece == null)
       {
-         alert("moving piece");
-         move_piece(piece_to_move,myRow,myCol);
+         move_piece(piece_to_move,row,col);
       }
       else if (piece != null)
       {
-         alert("highlighting piece");
          var table = $("table tbody")[0];
-         var cell = table.rows[myRow].cells[myCol]; // This is a DOM "TD" element
+         var cell = table.rows[row].cells[col]; // This is a DOM "TD" element
          var $cell = $(cell); // Now it's a jQuery object.
          piece_to_move = piece;
          
@@ -39,7 +38,6 @@ $(document).ready(function()
       }
       else
       {
-         alert("deselecting piece");
          piece_to_move = null;
       }
    });
@@ -70,28 +68,34 @@ function move_piece(piece, row, col)
    endpoint += "&src_col=" + piece["col"];
    endpoint += "&dest_row=" + row;
    endpoint += "&dest_col=" + col;
-   alert(endpoint);
+
    $.get(endpoint,function(data)
    {
-      alert(data);
       var json = jQuery.parseJSON(data);
-      var last_move = json["last_move"];
 
-      var src_row = last_move["src_row"];
-      var src_col = last_move["src_col"];
-      var dest_row = last_move["dest_row"];
-      var dest_col = last_move["dest_col"];
-
-      for(var i=0; i<pieces.length; i++)
+      if(json["success"] == "true")
       {
-         if(pieces[i]["row"] == src_row && pieces[i]["col"] == src_col)
+         var move = json["move"];
+
+         var src_row = move["src_row"];
+         var src_col = move["src_col"];
+         var dest_row = move["dest_row"];
+         var dest_col = move["dest_col"];
+
+         for(var i=0; i<pieces.length; i++)
          {
-            pieces[i]["row"] = dest_row;
-            pieces[i]["col"] = dest_col;
-            refresh_board();
-            break;
+            if(pieces[i]["row"] == src_row && pieces[i]["col"] == src_col)
+            {
+               pieces[i]["row"] = dest_row;
+               pieces[i]["col"] = dest_col;
+               refresh_board();
+               break;
+            }
          }
+
+         update_turn(json["turn"]);
       }
+      
    });
 }
 
@@ -150,8 +154,10 @@ function new_game()
    {
       var json = jQuery.parseJSON(data);
       var game_id = json["game_id"];
+
       current_game_id = game_id;
       $("#game_id").html(game_id);
+
       update_status(game_id);
       update_players(game_id);
       setup_board(game_id);
@@ -275,27 +281,14 @@ function update_status(game_id)
    {
       console.log(data);
       var json = jQuery.parseJSON(data);
-      var players = json["players"];
 
       if(json["state"] == "playing")
       {
-         turn = json["turn"];
-         if(turn == "black")
-         {
-            $("#black_player_name").addClass("turn");
-            $("#red_player_name").removeClass("turn");
-         }
-         else if(turn == "red")
-         {
-            $("#black_player_name").removeClass("turn");
-            $("#red_player_name").addClass("turn");
-         }
+         update_turn(json["turn"]);
       }
 
       if(json["last_move"] != null && json["last_move"]["number"] > last_move_number)
       {
-         alert("new move!");
-
          var last_move = json["last_move"];
 
          var src_row = last_move["src_row"];
@@ -315,6 +308,22 @@ function update_status(game_id)
          }
       }
    });
+}
+
+function update_turn(color)
+{
+   turn = color;
+
+   if(turn == "black")
+   {
+      $("#black_player_name").addClass("turn");
+      $("#red_player_name").removeClass("turn");
+   }
+   else if(turn == "red")
+   {
+      $("#black_player_name").removeClass("turn");
+      $("#red_player_name").addClass("turn");
+   }
 }
 
 function setup_board(game_id)
