@@ -1,4 +1,5 @@
 var current_game_id = "";
+var game_state = "";
 var player_name = "";
 var player_color = "";
 var turn = "";
@@ -14,7 +15,6 @@ $(document).ready(function()
    // Function to handle clicking squares on the board
    $('td').click(function()
    {
-
       $("td").removeClass("checker-highlight");
 
       var col = $(this).index();
@@ -23,11 +23,11 @@ $(document).ready(function()
 
       var piece = find_piece(player_color,row,col);
 
-      if(piece_to_move != null && piece == null)
+      if(piece_to_move !== null && piece === null)
       {
          move_piece(piece_to_move,row,col);
       }
-      else if (piece != null)
+      else if (piece !== null)
       {
          var table = $("table tbody")[0];
          var cell = table.rows[row].cells[col]; // This is a DOM "TD" element
@@ -44,7 +44,7 @@ $(document).ready(function()
    
    $("#new_game_button").click(function()
    {
-      new_game();      
+      new_game();
    });
 
    $("#ready_button").click(function()
@@ -73,14 +73,14 @@ function move_piece(piece, row, col)
    {
       var json = jQuery.parseJSON(data);
 
-      if(json["success"] == "true")
+      if(json.success == "true")
       {
-         var move = json["move"];
+         var move = json.move;
 
-         var src_row = move["src_row"];
-         var src_col = move["src_col"];
-         var dest_row = move["dest_row"];
-         var dest_col = move["dest_col"];
+         var src_row = move.src_row;
+         var src_col = move.src_col;
+         var dest_row = move.dest_row;
+         var dest_col = move.dest_col;
 
          for(var i=0; i<pieces.length; i++)
          {
@@ -95,7 +95,6 @@ function move_piece(piece, row, col)
 
          update_turn(json["turn"]);
       }
-      
    });
 }
 
@@ -129,7 +128,12 @@ function refresh_game_status()
 {
    if(refresh)
    {
-      update_players(current_game_id);
+      // Only update the players if we're still in pregame
+      if(game_state == "pregame")
+      {
+        update_players(current_game_id);
+      }
+      
       update_status(current_game_id);
       start_refresh_timer();
    }
@@ -153,7 +157,7 @@ function new_game()
    $.get("/newgame",function(data)
    {
       var json = jQuery.parseJSON(data);
-      var game_id = json["game_id"];
+      var game_id = json.game_id;
 
       current_game_id = game_id;
       $("#game_id").html(game_id);
@@ -187,17 +191,17 @@ function add_player(name,color)
    $.get("/addplayer?game_id=" + current_game_id + "&name=" + name + "&color=" + color, function(data)
    {
       var json = jQuery.parseJSON(data);
-      var players = json["players"];
+      var players = json.players;
       
       players.forEach(function(player)
       {
          if(player["color"] == "red")
          {
-            $("#red_player_name").html(player["name"]);
+            $("#red_player_name").html(player.name);
          }
          else
          {
-            $("#black_player_name").html(player["name"]);
+            $("#black_player_name").html(player.name);
          }
       });
 
@@ -281,13 +285,15 @@ function update_status(game_id)
    {
       console.log(data);
       var json = jQuery.parseJSON(data);
+      
+      game_state = json.state;
 
-      if(json["state"] == "playing")
+      if(game_state == "playing")
       {
-         update_turn(json["turn"]);
+         update_turn(json.turn);
       }
 
-      if(json["last_move"] != null && json["last_move"]["number"] > last_move_number)
+      if(json.last_move !== null && json.last_move.number > last_move_number)
       {
          var last_move = json["last_move"];
 
@@ -333,7 +339,7 @@ function setup_board(game_id)
       var json = jQuery.parseJSON(data);
       pieces = json["board"]["pieces"];
       
-      refresh_board();      
+      refresh_board();
    });
 }
 
@@ -362,7 +368,7 @@ function refresh_board()
          toAdd.addClass("red-checker");
       }
    
-      $cell.append(toAdd);         
+      $cell.append(toAdd);
 
    });
 }
