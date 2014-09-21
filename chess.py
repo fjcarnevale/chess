@@ -82,6 +82,11 @@ class Game(ndb.Model):
       player.color = color
       self.open_spots.remove(color);
       self.players.append(player)
+      
+      if len(self.players) == 2:
+         self.state = "playing"
+         self.turn = "red"
+      
       self.put()
 
    def move_piece(self,src_row,src_col,dest_row,dest_col):
@@ -95,14 +100,18 @@ class Game(ndb.Model):
       self.last_move.name = self.turn
       self.last_move.number = len(self.board.moves) + 1
 
-      self.board.moves.append(self.last_move);
+      self.board.moves.append(self.last_move)
 
+      self.switch_turn()
+      
+
+   def switch_turn(self):
       if self.turn == "red":
          self.turn = "black"
       else:
          self.turn = "red"
       self.put()
-
+      
    
 
    @staticmethod
@@ -127,5 +136,5 @@ class Game(ndb.Model):
       return game
 
 def randomword(length):
-	return ''.join(random.choice(string.lowercase) for i in range(length))
+  return ''.join(random.choice(string.lowercase) for i in range(length))
 

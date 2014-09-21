@@ -15,6 +15,12 @@ $(document).ready(function()
    // Function to handle clicking squares on the board
    $('td').click(function()
    {
+      if(game_state != "playing" || turn != player_color)
+      {
+         console.log("Its not your turn!");
+         return;
+      }
+
       $("td").removeClass("checker-highlight");
 
       var col = $(this).index();
@@ -26,6 +32,7 @@ $(document).ready(function()
       if(piece_to_move !== null && piece === null)
       {
          move_piece(piece_to_move,row,col);
+         piece_to_move = null;
       }
       else if (piece !== null)
       {
@@ -35,6 +42,15 @@ $(document).ready(function()
          piece_to_move = piece;
          
          $cell.addClass("checker-highlight");
+
+         var moves = get_valid_moves(player_color,row,col);
+         
+         moves.forEach(function(move)
+         {
+            cell = table.rows[move[0]].cells[move[1]]; // This is a DOM "TD" element
+            $cell = $(cell); // Now it's a jQuery object.
+            $cell.addClass("checker-highlight");
+         });
       }
       else
       {
@@ -160,7 +176,7 @@ function new_game()
       var game_id = json.game_id;
 
       current_game_id = game_id;
-      $("#game_id").html(game_id);
+      $("#game_id_input").val(game_id);
 
       update_status(game_id);
       update_players(game_id);
@@ -226,7 +242,7 @@ function update_players(game_id)
 {
    $.get("/players?game_id="+game_id, function(data)
    {
-      console.log(data);
+      //console.log(data);
       var json = jQuery.parseJSON(data);
       var players = json["players"];
       
@@ -283,7 +299,7 @@ function update_status(game_id)
 {
    $.get("/gamestatus?game_id="+game_id, function(data)
    {
-      console.log(data);
+      //console.log(data);
       var json = jQuery.parseJSON(data);
       
       game_state = json.state;
@@ -295,19 +311,19 @@ function update_status(game_id)
 
       if(json.last_move !== null && json.last_move.number > last_move_number)
       {
-         var last_move = json["last_move"];
+         var last_move = json.last_move;
 
-         var src_row = last_move["src_row"];
-         var src_col = last_move["src_col"];
-         var dest_row = last_move["dest_row"];
-         var dest_col = last_move["dest_col"];
+         var src_row = last_move.src_row;
+         var src_col = last_move.src_col;
+         var dest_row = last_move.dest_row;
+         var dest_col = last_move.dest_col;
 
          for(var i=0; i<pieces.length; i++)
          {
-            if(pieces[i]["row"] == src_row && pieces[i]["col"] == src_col)
+            if(pieces[i].row == src_row && pieces[i].col == src_col)
             {
-               pieces[i]["row"] = dest_row;
-               pieces[i]["col"] = dest_col;
+               pieces[i].row = dest_row;
+               pieces[i].col = dest_col;
                refresh_board();
                break;
             }
@@ -373,19 +389,59 @@ function refresh_board()
    });
 }
 
-function get_pawn_moves(color, row, col)
+function get_valid_moves(color, row, col)
 {
-   var moves = [];
-   
-   if(color == "white")
+   var possible_moves = [];
+   var valid_moves = [];
+
+   possible_moves.push([row-1,col-1]);
+   possible_moves.push([row-1,col+1]);
+   possible_moves.push([row+1,col-1]);
+   possible_moves.push([row+1,col+1]);
+
+   var opponent = "";
+
+   if(color == "red")
    {
-      moves.push([row - 1, col]);
-      moves.push([row - 2, col]);
+      opponent = "black";
    }
    else
    {
-   
+      opponent = "red";
    }
-   
-   return moves;
+
+   possible_moves.forEach(function(move)
+   {
+      if(find_piece(opponent,move[0],move[1]) !== null)
+      {
+
+         var jump_move = [(move[0]-row)*2 + row, (move[1]-col)*2 + col];
+         console.log("possible jump move from " + row + "," + col + " to " + jump_move[0] + "," + jump_move[1]);
+         if(find_piece(color,jump_move[0],jump_move[1]) === null && find_piece(opponent,jump_move[0],jump_move[1]) === null)
+         {
+            
+            valid_moves.push(jump_move);
+         }
+         else
+         {
+            console.log("jump move is invalid");
+         }
+      }
+      else if(find_piece(color, move[0], move[1]) === null)
+      {
+         valid_moves.push(move);
+      }
+   });
+
+   return valid_moves;
 }
+
+
+
+
+
+
+
+
+
+
