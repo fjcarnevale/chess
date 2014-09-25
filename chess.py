@@ -17,7 +17,6 @@ class Piece(ndb.Model):
    color = ndb.StringProperty()
    
 class Move(ndb.Model):
-   name = ndb.StringProperty()
    src_row = ndb.IntegerProperty()
    src_col = ndb.IntegerProperty()
    dest_row = ndb.IntegerProperty()
@@ -29,6 +28,15 @@ class Board(ndb.Model):
    moves = ndb.StructuredProperty(Move, repeated=True)
 
    def move_piece(self,src_row,src_col,dest_row,dest_col):
+      move = Move()
+      move.src_row = src_row
+      move.src_col = src_col
+      move.dest_row = dest_row
+      move.dest_col = dest_col
+      move.number = len(self.moves) + 1
+
+      self.moves.append(move)
+
       for index,piece in enumerate(self.pieces):
          if piece.row == src_row and piece.col == src_col:
             piece.row = dest_row
@@ -42,24 +50,29 @@ class Board(ndb.Model):
    def new_checker_board():
       board = Board();
       moves = []
+      counter = 0
 
       for pos in black_checker_positions:
          black_piece = Piece();
-         black_piece.name = "checker"
+         black_piece.name = "black-checker-" + str(counter)
          black_piece.color = "black"
          black_piece.row = pos[0]
          black_piece.col = pos[1]
 
          board.pieces.append(black_piece);
+         counter = counter + 1
+
+      counter = 0
 
       for pos in red_checker_positions:
          red_piece = Piece();
-         red_piece.name = "checker"
+         red_piece.name = "red-checker-" + str(counter)
          red_piece.color = "red"
          red_piece.row = pos[0]
          red_piece.col = pos[1]
 
          board.pieces.append(red_piece);
+         counter = counter + 1
 
       return board
 
@@ -73,7 +86,6 @@ class Game(ndb.Model):
    board = ndb.StructuredProperty(Board)
    players = ndb.StructuredProperty(Player, repeated=True)
    turn = ndb.StringProperty()
-   last_move = ndb.StructuredProperty(Move)
    open_spots = ndb.StringProperty(repeated=True)
 
    def add_player(self,name,color):
@@ -91,17 +103,6 @@ class Game(ndb.Model):
 
    def move_piece(self,src_row,src_col,dest_row,dest_col):
       self.board.move_piece(src_row,src_col,dest_row,dest_col)
-
-      self.last_move = Move()
-      self.last_move.src_row = src_row
-      self.last_move.src_col = src_col
-      self.last_move.dest_row = dest_row
-      self.last_move.dest_col = dest_col
-      self.last_move.name = self.turn
-      self.last_move.number = len(self.board.moves) + 1
-
-      self.board.moves.append(self.last_move)
-
       self.switch_turn()
       
 
@@ -111,7 +112,6 @@ class Game(ndb.Model):
       else:
          self.turn = "red"
       self.put()
-      
    
 
    @staticmethod

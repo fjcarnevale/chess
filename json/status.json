@@ -6,16 +6,17 @@
 
    "turn":"{{game.turn}}"
 
-   {% if game.last_move is defined %}
+   {% if game.board.moves|length > 0 %}
+   {% set move = game.board.moves[game.board.moves|length - 1] %}
    ,
    "last_move":
    {
-      "number":"{{game.last_move.number}}",
-      "name":"{{game.last_move.name}}",
-      "src_row":"{{game.last_move.src_row}}",
-      "src_col":"{{game.last_move.src_col}}",
-      "dest_row":"{{game.last_move.dest_row}}",
-      "dest_col":"{{game.last_move.dest_col}}"
+      "number":"{{move.number}}",
+      "name":"{{move.name}}",
+      "src_row":"{{move.src_row}}",
+      "src_col":"{{move.src_col}}",
+      "dest_row":"{{move.dest_row}}",
+      "dest_col":"{{move.dest_col}}"
    }
    {% endif %}
 }

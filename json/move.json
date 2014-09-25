@@ -1,6 +1,7 @@
 {% autoescape true %}
 {
    {% if success %}
+   {% set move = game.board.moves[game.board.moves|length - 1] %}
       "success":"true",
       "turn":"{{game.turn}}",
       "move":
