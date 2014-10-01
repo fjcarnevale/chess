@@ -22,26 +22,31 @@ class Move(ndb.Model):
    dest_row = ndb.IntegerProperty()
    dest_col = ndb.IntegerProperty()
    number = ndb.IntegerProperty()
+   piece_name = ndb.StringProperty()
 
 class Board(ndb.Model):
    pieces = ndb.StructuredProperty(Piece, repeated=True)
    moves = ndb.StructuredProperty(Move, repeated=True)
 
-   def move_piece(self,src_row,src_col,dest_row,dest_col):
+   def move_piece(self,piece_name,dest_row,dest_col):
       move = Move()
-      move.src_row = src_row
-      move.src_col = src_col
+      move.piece_name = piece_name
       move.dest_row = dest_row
       move.dest_col = dest_col
       move.number = len(self.moves) + 1
 
-      self.moves.append(move)
-
       for index,piece in enumerate(self.pieces):
-         if piece.row == src_row and piece.col == src_col:
+         if piece.name == piece_name:
+
+            move.src_row = piece.row
+            move.src_col = piece.col
+
             piece.row = dest_row
             piece.col = dest_col
+
             self.pieces[index] = piece
+            self.moves.append(move)
+
             return
 
       print "couldn't find piece"
@@ -101,8 +106,8 @@ class Game(ndb.Model):
       
       self.put()
 
-   def move_piece(self,src_row,src_col,dest_row,dest_col):
-      self.board.move_piece(src_row,src_col,dest_row,dest_col)
+   def move_piece(self,piece_name,dest_row,dest_col):
+      self.board.move_piece(piece_name,dest_row,dest_col)
       self.switch_turn()
       
 

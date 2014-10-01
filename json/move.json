@@ -7,7 +7,7 @@
       "move":
       {
          "number":"{{move.number}}",
-         "name":"{{move.name}}",
+         "piece_name":"{{move.piece_name}}",
          "src_row":"{{move.src_row}}",
          "src_col":"{{move.src_col}}",
          "dest_row":"{{move.dest_row}}",

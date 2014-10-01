@@ -80,8 +80,9 @@ $(document).ready(function()
 function move_piece(piece, row, col)
 {
    var endpoint = "/move?game_id=" + current_game_id;
-   endpoint += "&src_row=" + piece["row"];
-   endpoint += "&src_col=" + piece["col"];
+   //endpoint += "&src_row=" + piece["row"];
+   //endpoint += "&src_col=" + piece["col"];
+   endpoint += "&piece_name=" + piece.name;
    endpoint += "&dest_row=" + row;
    endpoint += "&dest_col=" + col;
 
@@ -93,14 +94,15 @@ function move_piece(piece, row, col)
       {
          var move = json.move;
 
-         var src_row = move.src_row;
-         var src_col = move.src_col;
+         //var src_row = move.src_row;
+         //var src_col = move.src_col;
+         var piece_name = move.piece_name
          var dest_row = move.dest_row;
          var dest_col = move.dest_col;
 
          for(var i=0; i<pieces.length; i++)
          {
-            if(pieces[i]["row"] == src_row && pieces[i]["col"] == src_col)
+            if(pieces[i]["name"] == piece_name)
             {
                pieces[i]["row"] = dest_row;
                pieces[i]["col"] = dest_col;
@@ -299,7 +301,7 @@ function update_status(game_id)
 {
    $.get("/gamestatus?game_id="+game_id, function(data)
    {
-      //console.log(data);
+      console.log(data);
       var json = jQuery.parseJSON(data);
       
       game_state = json.state;
@@ -309,18 +311,18 @@ function update_status(game_id)
          update_turn(json.turn);
       }
 
-      if(json.last_move !== null && json.last_move.number > last_move_number)
+      
+      if("last_move" in json && json.last_move.number > last_move_number)
       {
          var last_move = json.last_move;
 
-         var src_row = last_move.src_row;
-         var src_col = last_move.src_col;
+         var piece_name = last_move.piece_name;
          var dest_row = last_move.dest_row;
          var dest_col = last_move.dest_col;
 
          for(var i=0; i<pieces.length; i++)
          {
-            if(pieces[i].row == src_row && pieces[i].col == src_col)
+            if(pieces[i].name == piece_name)
             {
                pieces[i].row = dest_row;
                pieces[i].col = dest_col;
