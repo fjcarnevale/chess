@@ -17,39 +17,52 @@ class Piece(ndb.Model):
    color = ndb.StringProperty()
    
 class Move(ndb.Model):
+   number = ndb.IntegerProperty()
+   piece_name = ndb.StringProperty()
+   captures = ndb.StringProperty()
    src_row = ndb.IntegerProperty()
    src_col = ndb.IntegerProperty()
    dest_row = ndb.IntegerProperty()
    dest_col = ndb.IntegerProperty()
-   number = ndb.IntegerProperty()
-   piece_name = ndb.StringProperty()
+   
+   @staticmethod
+   def new_move(number,piece_name,src_row,src_col,dest_row,dest_col,captures=""):
+      move = Move()
+      move.number = number
+      move.piece_name = piece_name
+      move.captures = captures
+      move.src_row = src_row
+      move.src_col = src_col
+      move.dest_row = dest_row
+      move.dest_col = dest_col
+      return move
+      
 
 class Board(ndb.Model):
    pieces = ndb.StructuredProperty(Piece, repeated=True)
    moves = ndb.StructuredProperty(Move, repeated=True)
 
    def move_piece(self,piece_name,dest_row,dest_col):
-      move = Move()
-      move.piece_name = piece_name
-      move.dest_row = dest_row
-      move.dest_col = dest_col
-      move.number = len(self.moves) + 1
+      piece = self.find_piece_by_name(piece_name)
 
-      for index,piece in enumerate(self.pieces):
-         if piece.name == piece_name:
+      if piece is None:
+         raise Exception("Failed to find piece with name %s" % piece_name)
+            
+      number = len(self.moves) + 1
+      move = Move.new_move(number,piece_name,piece.row,piece.col,dest_row,dest_col)
 
-            move.src_row = piece.row
-            move.src_col = piece.col
+      piece.row = dest_row
+      piece.col = dest_col
 
-            piece.row = dest_row
-            piece.col = dest_col
+      self.moves.append(move)
 
-            self.pieces[index] = piece
-            self.moves.append(move)
+   def find_piece_by_name(self, piece_name):
+      pieces = filter(lambda piece: piece.name == piece_name, self.pieces)
 
-            return
-
-      print "couldn't find piece"
+      if len(pieces) > 0:
+         return pieces[0]
+      else:
+         return None
 
    @staticmethod
    def new_checker_board():
