@@ -10,12 +10,14 @@ red_checker_positions = [(5, 0), (5, 2), (5, 4), (5, 6), (5, 8),
                     (6, 1), (6, 3), (6, 5), (6, 7), (6, 9),
                     (7, 0), (7, 2), (7, 4), (7, 6), (7, 8)]
 
+# Class for Pieces
 class Piece(ndb.Model):
    name = ndb.StringProperty()
    row = ndb.IntegerProperty()
    col = ndb.IntegerProperty()
    color = ndb.StringProperty()
-   
+
+# Class for Moves
 class Move(ndb.Model):
    number = ndb.IntegerProperty()
    piece_name = ndb.StringProperty()
@@ -25,6 +27,8 @@ class Move(ndb.Model):
    dest_row = ndb.IntegerProperty()
    dest_col = ndb.IntegerProperty()
    
+   # Helper method to create new moves
+   # Returns a Move
    @staticmethod
    def new_move(number,piece_name,src_row,src_col,dest_row,dest_col,captures=""):
       move = Move()
@@ -37,11 +41,13 @@ class Move(ndb.Model):
       move.dest_col = dest_col
       return move
       
-
+# Class for Boards
 class Board(ndb.Model):
    pieces = ndb.StructuredProperty(Piece, repeated=True)
    moves = ndb.StructuredProperty(Move, repeated=True)
 
+   # Moves a piece, and stores a Move object to record the move
+   # Returns nothing
    def move_piece(self,piece_name,dest_row,dest_col):
       piece = self.find_piece_by_name(piece_name)
 
@@ -56,6 +62,8 @@ class Board(ndb.Model):
 
       self.moves.append(move)
 
+   # Finds piece with matching piece name
+   # Returns a Piece if a matching one is found, otherwise None
    def find_piece_by_name(self, piece_name):
       pieces = filter(lambda piece: piece.name == piece_name, self.pieces)
 
@@ -64,6 +72,8 @@ class Board(ndb.Model):
       else:
          return None
 
+   # Helper method to create and setup a new checker board
+   # Returns a Board
    @staticmethod
    def new_checker_board():
       board = Board();
@@ -94,10 +104,22 @@ class Board(ndb.Model):
 
       return board
 
+# Class for players
 class Player(ndb.Model):
    name = ndb.StringProperty()
    color = ndb.StringProperty()
 
+   # Helper method to create new players
+   # Returns a Player
+   @staticmethod
+   def new_player(name,color):
+      player = Player()
+      player.name = name
+      player.color = color
+      return player
+
+# Class for Games
+# TODO extend this class for different games (e.g. checkers, chess)
 class Game(ndb.Model):
    game_id = ndb.StringProperty()
    state = ndb.StringProperty()
@@ -106,10 +128,14 @@ class Game(ndb.Model):
    turn = ndb.StringProperty()
    open_spots = ndb.StringProperty(repeated=True)
 
+   # Adds player if the desired color is available
+   # Returns nothing
    def add_player(self,name,color):
-      player = Player()
-      player.name = name
-      player.color = color
+      if not color in open_slots:
+         raise Exception("Color %s is not available" % color)
+
+      player = Player.new_player(name,color)
+
       self.open_spots.remove(color);
       self.players.append(player)
       
@@ -119,27 +145,34 @@ class Game(ndb.Model):
       
       self.put()
 
+   # Moves the piece to the destination row and column
+   # Returns nothing
    def move_piece(self,piece_name,dest_row,dest_col):
       self.board.move_piece(piece_name,dest_row,dest_col)
       self.switch_turn()
-      
 
+   # Switches turn between black and red
+   # Commits to DB
+   # Returns nothing
    def switch_turn(self):
       if self.turn == "red":
          self.turn = "black"
       else:
          self.turn = "red"
       self.put()
-   
 
+   # Helper method to retrieve games by their ID
+   # Returns a Game
    @staticmethod
    def get_by_id(game_id):
       key = ndb.Key(Game,game_id)
       return key.get()
 
+   # Sets up a new checker game
+   # Returns a Game
    @staticmethod
    def new_checker_game():
-      game_id = randomword(8);
+      game_id = generate_game_id();
    
       game = Game(id=game_id);
       game.game_id = game_id
@@ -153,6 +186,10 @@ class Game(ndb.Model):
 
       return game
 
-def randomword(length):
-  return ''.join(random.choice(string.lowercase) for i in range(length))
+   # Generates a random string of characters
+   # Returns a string
+   @staticmethod
+   def generate_game_id(length=8):
+      return ''.join(random.choice(string.lowercase) for i in range(length))
+
 
