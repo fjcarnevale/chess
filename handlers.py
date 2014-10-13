@@ -84,8 +84,6 @@ class Move(BaseHandler):
       game_id = self.request.get("game_id")
       game = chess.Game.get_by_id(game_id)
 
-      #src_row = int(self.request.get("src_row"))
-      #src_col = int(self.request.get("src_col"))
       piece_name = self.request.get("piece_name")      
       dest_row = int(self.request.get("dest_row"))
       dest_col = int(self.request.get("dest_col"))
@@ -105,10 +103,16 @@ class AddPlayer(BaseHandler):
 
       game = chess.Game.get_by_id(game_id)
 
-      game.add_player(name,color)
+      player = game.add_player(name,color)
 
-      template_values = {"game":game}
-      template = JINJA_ENVIRONMENT.get_template('json/players.json')
+      # TODO better error handling
+      success = False
+      error = "Failed to add player"
+      if player is not None:
+         success = True
+
+      template_values = {"player":player,"success":success, "error":error}
+      template = JINJA_ENVIRONMENT.get_template('json/add_player_response.json')
       self.response.write(template.render(template_values))
 
 

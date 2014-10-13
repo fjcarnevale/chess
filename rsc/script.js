@@ -80,8 +80,6 @@ $(document).ready(function()
 function move_piece(piece, row, col)
 {
    var endpoint = "/move?game_id=" + current_game_id;
-   //endpoint += "&src_row=" + piece["row"];
-   //endpoint += "&src_col=" + piece["col"];
    endpoint += "&piece_name=" + piece.name;
    endpoint += "&dest_row=" + row;
    endpoint += "&dest_col=" + col;
@@ -94,8 +92,6 @@ function move_piece(piece, row, col)
       {
          var move = json.move;
 
-         //var src_row = move.src_row;
-         //var src_col = move.src_col;
          var piece_name = move.piece_name
          var dest_row = move.dest_row;
          var dest_col = move.dest_col;
@@ -116,6 +112,8 @@ function move_piece(piece, row, col)
    });
 }
 
+// Finds the piece with the given color at row,col
+// Returns null if no matching piece is found
 function find_piece(color, row, col)
 {
    var pieces;
@@ -142,6 +140,7 @@ function find_piece(color, row, col)
    return found_piece;
 }
 
+// Refreshes the game status
 function refresh_game_status()
 {
    if(refresh)
@@ -170,7 +169,8 @@ function stop_refresh_timer()
 
 function new_game()
 {
-   $(".piece").remove();
+   // Clean the current game
+   clean_game();
 
    $.get("/newgame",function(data)
    {
@@ -187,56 +187,54 @@ function new_game()
    });
 }
 
+// Joins a given game
 function join_game()
 {
-   $(".piece").remove();
+   // Clean the current game
+   clean_game();
 
+   // Get the game id we want to join
    current_game_id = $("#game_id_input").val();
 
+   // Update the status, players, and board
    update_status(current_game_id);
    update_players(current_game_id);
    setup_board(current_game_id);
    start_refresh_timer();
 }
 
+// Adds the user as a player in the game
 function add_player(name,color)
 {
-   $("#ready_button").prop( "disabled", true );
+   // Disable ready button
+   $("#ready_button").prop( "disabled", true);
 
    player_name = name;
    player_color = color;
    
+   // Send request to add player
    $.get("/addplayer?game_id=" + current_game_id + "&name=" + name + "&color=" + color, function(data)
    {
       var json = jQuery.parseJSON(data);
-      var players = json.players;
-      
-      players.forEach(function(player)
+
+      // Check for success
+      if(json.success == "True")
       {
-         if(player["color"] == "red")
+         // If successfull, add the player
+         if(json.player.color == "red")
          {
-            $("#red_player_name").html(player.name);
+            $("#red_player_name").html(json.player.name);
          }
          else
          {
-            $("#black_player_name").html(player.name);
-         }
-      });
-
-      if(json["state"] == "playing")
-      {
-         if(json["turn"] == "black")
-         {
-            $("#black_player_name").addClass("turn");
-            $("#red_player_name").removeClass("turn");
-         }
-         else if(json["turn"] == "red")
-         {
-            $("#black_player_name").removeClass("turn");
-            $("#red_player_name").addClass("turn");
+            $("#black_player_name").html(json.player.name);
          }
       }
-      
+      else
+      {
+         // Otherwise alert why we failed
+         alert(json.error);
+      }
    });
 }
 
@@ -244,10 +242,11 @@ function update_players(game_id)
 {
    $.get("/players?game_id="+game_id, function(data)
    {
-      //console.log(data);
       var json = jQuery.parseJSON(data);
-      var players = json["players"];
+      var players = json.players;
       
+      // TODO only set the html value if it hasn't been set yet
+      // TODO keep track of the player names in javascript
       players.forEach(function(player)
       {
          if(player["color"] == "red")
@@ -260,24 +259,26 @@ function update_players(game_id)
          }
       });
       
+      // Determine which colors are still available
       var open_spots = [];
 
-      json["open_spots"].forEach(function(element)
+      json.open_spots.forEach(function(element)
       {
          open_spots.push(element["spot"]);
       });
 
+      // Determine which spots are listed in the combo box
       var current_spots = [];
       $("#player_color option").each(function()
       {
           current_spots.push($(this).val());
       });
 
+      // Add any colors that aren't in the color selection box
       open_spots.forEach(function(spot)
       {
          if(current_spots.indexOf(spot) < 0)
          {
-            console.log("adding " + spot);
             $('#player_color')
                .append($("<option></option>")
 
@@ -286,6 +287,7 @@ function update_players(game_id)
          }
       });
 
+      // Remove any colors that are no longer available
       current_spots.forEach(function(spot)
       {
          if(open_spots.indexOf(spot) < 0)
@@ -297,6 +299,7 @@ function update_players(game_id)
    });
 }
 
+// Updates the game status
 function update_status(game_id)
 {
    $.get("/gamestatus?game_id="+game_id, function(data)
@@ -348,6 +351,30 @@ function update_turn(color)
       $("#black_player_name").removeClass("turn");
       $("#red_player_name").addClass("turn");
    }
+}
+
+// Cleans the game state
+function clean_game()
+{
+   // Remove pieces
+   $(".piece").remove();
+
+   // Un-highlight any highlighted spaces
+   $("td").removeClass("checker-highlight");
+
+   // Reset game variables
+   current_game_id = "";
+   game_state = "";
+   player_name = "";
+   player_color = "";
+   turn = "";
+   black_pieces = [];
+   red_pieces = [];
+   move_history = [];
+   piece_to_move = null;
+   refresh = 0;
+   last_move_number = 0;
+
 }
 
 function setup_board(game_id)

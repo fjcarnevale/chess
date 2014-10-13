@@ -1,0 +1,11 @@
+{% autoescape true %}
+{
+   "success":"{{success}}",
+
+   {% if success == True %}
+      "player":{"name":"{{player.name}}","color":"{{player.color}}"}
+   {% else %}
+      "error":"{{error}}"
+   {% endif %}
+}
+{% endautoescape %}

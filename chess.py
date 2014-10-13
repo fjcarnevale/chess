@@ -131,7 +131,7 @@ class Game(ndb.Model):
    # Adds player if the desired color is available
    # Returns nothing
    def add_player(self,name,color):
-      if not color in open_slots:
+      if not color in self.open_spots:
          raise Exception("Color %s is not available" % color)
 
       player = Player.new_player(name,color)
@@ -144,6 +144,8 @@ class Game(ndb.Model):
          self.turn = "red"
       
       self.put()
+
+      return player
 
    # Moves the piece to the destination row and column
    # Returns nothing
@@ -172,7 +174,7 @@ class Game(ndb.Model):
    # Returns a Game
    @staticmethod
    def new_checker_game():
-      game_id = generate_game_id();
+      game_id = Game.generate_game_id();
    
       game = Game(id=game_id);
       game.game_id = game_id
