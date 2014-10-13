@@ -13,6 +13,7 @@ application = webapp2.WSGIApplication([
    ('/board', handlers.Board),
    ('/players', handlers.Players),
    ('/move', handlers.Move),
+   ('/getmove', handlers.GetMove),
    ('/addplayer', handlers.AddPlayer)
 ], config=config, debug=True)
 

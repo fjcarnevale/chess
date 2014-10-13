@@ -90,10 +90,23 @@ class Move(BaseHandler):
 
       game.move_piece(piece_name, dest_row, dest_col)
 
-      template_values = {"game":game, "success":True}
+      template_values = {"game":game, "move":game.board.moves[-1]}
       template = JINJA_ENVIRONMENT.get_template('json/move.json')
       self.response.write(template.render(template_values))
       
+# Gets information for a single move
+class GetMove(BaseHandler):
+   def get(self):
+      game_id = self.request.get("game_id")
+      game = chess.Game.get_by_id(game_id)
+
+      move_num = int(self.request.get("move_num"))
+
+      move = game.board.moves[move_num]    
+
+      template_values = {"game":game, "move":move}
+      template = JINJA_ENVIRONMENT.get_template('json/move.json')
+      self.response.write(template.render(template_values))
 
 class AddPlayer(BaseHandler):
    def get(self):

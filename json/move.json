@@ -1,21 +1,15 @@
 {% autoescape true %}
 {
-   {% if success %}
-   {% set move = game.board.moves[game.board.moves|length - 1] %}
-      "success":"true",
-      "turn":"{{game.turn}}",
-      "move":
-      {
-         "number":"{{move.number}}",
-         "piece_name":"{{move.piece_name}}",
-         "src_row":"{{move.src_row}}",
-         "src_col":"{{move.src_col}}",
-         "dest_row":"{{move.dest_row}}",
-         "dest_col":"{{move.dest_col}}"
-      }
-   {% else %}
-      "success":"false"
-   {% endif %}
+   "turn":"{{game.turn}}",
+   "move":
+   {
+      "number":"{{move.number}}",
+      "piece_name":"{{move.piece_name}}",
+      "src_row":"{{move.src_row}}",
+      "src_col":"{{move.src_col}}",
+      "dest_row":"{{move.dest_row}}",
+      "dest_col":"{{move.dest_col}}"
+   }
    
 }
 {% endautoescape %}

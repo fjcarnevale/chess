@@ -88,27 +88,24 @@ function move_piece(piece, row, col)
    {
       var json = jQuery.parseJSON(data);
 
-      if(json.success == "true")
+      var move = json.move;
+
+      var piece_name = move.piece_name
+      var dest_row = move.dest_row;
+      var dest_col = move.dest_col;
+
+      for(var i=0; i<pieces.length; i++)
       {
-         var move = json.move;
-
-         var piece_name = move.piece_name
-         var dest_row = move.dest_row;
-         var dest_col = move.dest_col;
-
-         for(var i=0; i<pieces.length; i++)
+         if(pieces[i]["name"] == piece_name)
          {
-            if(pieces[i]["name"] == piece_name)
-            {
-               pieces[i]["row"] = dest_row;
-               pieces[i]["col"] = dest_col;
-               refresh_board();
-               break;
-            }
+            pieces[i]["row"] = dest_row;
+            pieces[i]["col"] = dest_col;
+            refresh_board();
+            break;
          }
-
-         update_turn(json["turn"]);
       }
+
+      update_turn(json["turn"]);
    });
 }
 
@@ -242,6 +239,7 @@ function update_players(game_id)
 {
    $.get("/players?game_id="+game_id, function(data)
    {
+      console.log(data);
       var json = jQuery.parseJSON(data);
       var players = json.players;
       
@@ -304,17 +302,19 @@ function update_status(game_id)
 {
    $.get("/gamestatus?game_id="+game_id, function(data)
    {
-      console.log(data);
+      //console.log(data);
       var json = jQuery.parseJSON(data);
-      
-      game_state = json.state;
+
+      // Update game state
+      game_state = json.state
 
       if(game_state == "playing")
       {
          update_turn(json.turn);
       }
 
-      
+      // TODO remove last move from status.json
+      // Instead, just check the last move number and request info for that move
       if("last_move" in json && json.last_move.number > last_move_number)
       {
          var last_move = json.last_move;
