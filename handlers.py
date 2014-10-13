@@ -1,10 +1,9 @@
+import jinja2
 import os
 import urllib2
+import webapp2
 
 from google.appengine.ext import ndb
-
-import jinja2
-import webapp2
 from webapp2_extras import sessions
 
 import chess
@@ -32,13 +31,16 @@ class BaseHandler(webapp2.RequestHandler):
         # Returns a session using the default cookie key.
         return self.session_store.get_session()
 
+# Handles a request for the main page
 class Index(BaseHandler):
-   """ Handles requests to the main page """
+
    def get(self):
       template = JINJA_ENVIRONMENT.get_template('index.html')
       self.response.write(template.render())
 
+# Handles requests for a new game
 class NewGame(BaseHandler):
+
    def get(self):
       game = chess.Game.new_checker_game()
 
@@ -46,7 +48,10 @@ class NewGame(BaseHandler):
       template = JINJA_ENVIRONMENT.get_template('json/newgame.json')
       self.response.write(template.render(template_values))
 
+# Handles requests for game status
+# Game status messages inlcude id, state, turn, and last move (if the game has started)
 class GameStatus(BaseHandler):
+
    def get(self):
       game_id = self.request.get("game_id")
       game = chess.Game.get_by_id(game_id)
@@ -55,6 +60,7 @@ class GameStatus(BaseHandler):
       template = JINJA_ENVIRONMENT.get_template('json/status.json')
       self.response.write(template.render(template_values))
 
+# Returns a json message detailing the state of the board
 class Board(BaseHandler):
    def get(self):
       game_id = self.request.get("game_id")
