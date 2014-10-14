@@ -137,6 +137,29 @@ function find_piece(color, row, col)
    return found_piece;
 }
 
+// Finds piece by name
+// Returns null if the piece can't be found
+function find_piece_by_name(piece_name)
+{
+   for(var i = 0; i < black_pieces.length; i++)
+   {
+      if(black_pieces[i].name == piece_name)
+      {
+         return black_pieces[i];
+      }
+   }
+
+   for(var i = 0; i < red_pieces.length; i++)
+   {
+      if(red_pieces[i].name == piece_name)
+      {
+         return red_pieces[i];
+      }
+   }
+
+   return null;
+}
+
 // Refreshes the game status
 function refresh_game_status()
 {
@@ -153,17 +176,21 @@ function refresh_game_status()
    }
 }
 
+// Starts the refresh timer
 function start_refresh_timer()
 {
    refresh = 1;
    setTimeout(refresh_game_status, 10000);
 }
 
+// Stops refresh timer
 function stop_refresh_timer()
 {
    refresh = 0;
 }
 
+
+// Creates a new game
 function new_game()
 {
    // Clean the current game
@@ -235,6 +262,8 @@ function add_player(name,color)
    });
 }
 
+
+// Updates the players
 function update_players(game_id)
 {
    $.get("/players?game_id="+game_id, function(data)
@@ -323,15 +352,17 @@ function update_status(game_id)
          var dest_row = last_move.dest_row;
          var dest_col = last_move.dest_col;
 
-         for(var i=0; i<pieces.length; i++)
+         piece = find_piece_by_name(piece_name);
+
+         if(piece != null)
          {
-            if(pieces[i].name == piece_name)
-            {
-               pieces[i].row = dest_row;
-               pieces[i].col = dest_col;
-               refresh_board();
-               break;
-            }
+            piece.row = dest_row;
+            piece.col = dest_col;
+            refresh_board();
+         }
+         else
+         {
+            console.log("Couldn't find piece with name " + piece_name);
          }
       }
    });

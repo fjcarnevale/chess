@@ -13,8 +13,6 @@
    {
       "number":"{{move.number}}",
       "piece_name":"{{move.piece_name}}",
-      "src_row":"{{move.src_row}}",
-      "src_col":"{{move.src_col}}",
       "dest_row":"{{move.dest_row}}",
       "dest_col":"{{move.dest_col}}"
    }
