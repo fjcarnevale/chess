@@ -370,28 +370,32 @@ function update_status(game_id)
          update_turn(json.turn);
       }
 
-      // TODO remove last move from status.json
-      // Instead, just check the last move number and request info for that move
+      // TODO either remove this from status and just indicate the last move number
+      // OR pass the move information to a separate method so this and the move function use the same code
       if("last_move" in json && json.last_move.number > last_move_number)
       {
-         var last_move = json.last_move;
+         var move = json.last_move;
 
-         var piece_name = last_move.piece_name;
-         var dest_row = last_move.dest_row;
-         var dest_col = last_move.dest_col;
+         var piece_name = move.piece_name
+         var dest_row = move.dest_row;
+         var dest_col = move.dest_col;
+         
+         // Get the piece to be moved and remove it from the board
+         var piece = board[move.src_row][move.src_col];
+         board[piece.row][piece.col] = null;
+         
+         // Move piece's row and col
+         piece.row = dest_row;
+         piece.col = dest_col;
 
-         piece = find_piece_by_name(piece_name);
+         // Reinsert the piece in the new location
+         board[piece.row][piece.col] = piece;
 
-         if(piece != null)
-         {
-            piece.row = dest_row;
-            piece.col = dest_col;
-            refresh_board();
-         }
-         else
-         {
-            console.log("Couldn't find piece with name " + piece_name);
-         }
+         // Refresh the board
+         refresh_board();
+
+         // Update the turn
+         update_turn(json["turn"]);
       }
    });
 }
@@ -518,7 +522,7 @@ function get_valid_moves(color, row, col)
    possible_locations.forEach(function(move)
    {
       // Check for a piece there
-      var piece = board[row][col]
+      var piece = board[move[0]][move[1]]
 
       // If there is an opponent piece there
       if(piece !== null && piece.color != player_color)
@@ -526,6 +530,7 @@ function get_valid_moves(color, row, col)
          // Check to see if we can jump it
          var jump_move = [(move[0]-row)*2 + row, (move[1]-col)*2 + col];
 
+         alert("possible jump to " + jump_move[0] + ", " + jump_move[1]);
          if(board[jump_move[0]][jump_move[1]] === null)
          {
             // We can jump to it, add the jump move
@@ -539,6 +544,7 @@ function get_valid_moves(color, row, col)
       }
    });
 
+   // Return the list of valid moves
    return valid_moves;
 }
 
