@@ -55,6 +55,11 @@
    background-color: #60BFFF;
 }
 
+.checker-jump-highlight
+{
+   background-color: #60FF60
+}
+
 .possible-move
 {
    background-color: #80DFFF

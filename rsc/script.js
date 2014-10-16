@@ -5,6 +5,8 @@ var player_color = "";
 var turn = "";
 var black_pieces = [];
 var red_pieces = [];
+var regular_moves = [];
+var jump_moves = [];
 var move_history = [];
 var piece_to_move = null;
 var refresh = 0;
@@ -22,6 +24,7 @@ $(document).ready(function()
       }
 
       $("td").removeClass("checker-highlight");
+      $("td").removeClass("checker-jump-highlight");
 
       var col = $(this).index();
       var $tr = $(this).closest('tr');
@@ -33,6 +36,8 @@ $(document).ready(function()
       {
          move_piece(piece_to_move,row,col);
          piece_to_move = null;
+         regular_moves = [];
+         jump_moves = [];
       }
       else if (piece !== null)
       {
@@ -44,17 +49,28 @@ $(document).ready(function()
          $cell.addClass("checker-highlight");
 
          var moves = get_valid_moves(player_color,row,col);
+         regular_moves = moves[0];
+         jump_moves = moves[1];
          
-         moves.forEach(function(move)
+         regular_moves.forEach(function(move)
          {
             cell = table.rows[move[0]].cells[move[1]]; // This is a DOM "TD" element
             $cell = $(cell); // Now it's a jQuery object.
             $cell.addClass("checker-highlight");
          });
+
+         jump_moves.forEach(function(move)
+         {
+            cell = table.rows[move[0]].cells[move[1]]; // This is a DOM "TD" element
+            $cell = $(cell); // Now it's a jQuery object.
+            $cell.addClass("checker-jump-highlight");
+         });
       }
       else
       {
          piece_to_move = null;
+         regular_moves = [];
+         jump_moves = [];
       }
    });
    
@@ -449,10 +465,15 @@ function refresh_board()
    });
 }
 
+// Finds all possible moves from a certain position
+// Returns array containing two other arrays
+// The first array is a list of valid non-capture moves
+// The second array is a list of valid capture moves
 function get_valid_moves(color, row, col)
 {
    var possible_moves = [];
-   var valid_moves = [];
+   var reg_moves = [];
+   var capture_moves = [];
 
    possible_moves.push([row-1,col-1]);
    possible_moves.push([row-1,col+1]);
@@ -480,7 +501,7 @@ function get_valid_moves(color, row, col)
          if(find_piece(color,jump_move[0],jump_move[1]) === null && find_piece(opponent,jump_move[0],jump_move[1]) === null)
          {
             
-            valid_moves.push(jump_move);
+            capture_moves.push(jump_move);
          }
          else
          {
@@ -489,11 +510,11 @@ function get_valid_moves(color, row, col)
       }
       else if(find_piece(color, move[0], move[1]) === null)
       {
-         valid_moves.push(move);
+         reg_moves.push(move);
       }
    });
 
-   return valid_moves;
+   return [reg_moves, capture_moves];
 }
 
 

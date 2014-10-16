@@ -70,6 +70,7 @@ class Board(BaseHandler):
       template = JINJA_ENVIRONMENT.get_template('json/board.json')
       self.response.write(template.render(template_values))
 
+# Returns the players and open slots available
 class Players(BaseHandler):
    def get(self):
       game_id = self.request.get("game_id")
@@ -79,6 +80,7 @@ class Players(BaseHandler):
       template = JINJA_ENVIRONMENT.get_template('json/players.json')
       self.response.write(template.render(template_values))
 
+# Moves a piece
 class Move(BaseHandler):
    def get(self):
       game_id = self.request.get("game_id")
