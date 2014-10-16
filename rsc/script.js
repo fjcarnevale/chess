@@ -5,9 +5,9 @@ var player_color = "";
 var turn = "";
 var black_pieces = [];
 var red_pieces = [];
-var regular_moves = [];
-var jump_moves = [];
 var move_history = [];
+var board = [];
+var moves = [];
 var piece_to_move = null;
 var refresh = 0;
 var last_move_number = 0;
@@ -17,68 +17,75 @@ $(document).ready(function()
    // Function to handle clicking squares on the board
    $('td').click(function()
    {
-      if(game_state != "playing" || turn != player_color)
-      {
-         console.log("Its not your turn!");
+      // Nothing to do, not our turn
+      if(turn != player_color)
          return;
-      }
 
+      // Remove any highlights
       $("td").removeClass("checker-highlight");
       $("td").removeClass("checker-jump-highlight");
 
+      // Determine the row / column clicked
       var col = $(this).index();
       var $tr = $(this).closest('tr');
       var row = $tr.index();
 
-      var piece = find_piece(player_color,row,col);
+      // Get the piece at that location on the board
+      var piece = board[row][col];
 
+      // If there is a piece ready to move and this is a blank space
       if(piece_to_move !== null && piece === null)
       {
+         // Move it
          move_piece(piece_to_move,row,col);
+
+         // Clear the piece to move
          piece_to_move = null;
-         regular_moves = [];
-         jump_moves = [];
       }
-      else if (piece !== null)
+      else if (piece !== null && piece.color == player_color) // Else if we're selecting a piece to move
       {
+         // Save the piece
+         piece_to_move = piece;
+
+         // Highlight the square the piece is on
          var table = $("table tbody")[0];
          var cell = table.rows[row].cells[col]; // This is a DOM "TD" element
-         var $cell = $(cell); // Now it's a jQuery object.
-         piece_to_move = piece;
-         
+         var $cell = $(cell); // Now it's a jQuery object
          $cell.addClass("checker-highlight");
 
-         var moves = get_valid_moves(player_color,row,col);
-         regular_moves = moves[0];
-         jump_moves = moves[1];
+         // Figure out where that piece can move
+         moves = get_valid_moves(player_color,row,col);
          
-         regular_moves.forEach(function(move)
+         // Highlight the squares for each move
+         moves.forEach(function(move)
          {
-            cell = table.rows[move[0]].cells[move[1]]; // This is a DOM "TD" element
+            cell = table.rows[move.x].cells[move.y]; // This is a DOM "TD" element
             $cell = $(cell); // Now it's a jQuery object.
-            $cell.addClass("checker-highlight");
-         });
 
-         jump_moves.forEach(function(move)
-         {
-            cell = table.rows[move[0]].cells[move[1]]; // This is a DOM "TD" element
-            $cell = $(cell); // Now it's a jQuery object.
-            $cell.addClass("checker-jump-highlight");
+            if(move.type == "jump")
+            {
+               $cell.addClass("checker-jump-highlight");
+            }
+            else
+            {
+               $cell.addClass("checker-highlight");
+            }
          });
       }
       else
       {
+         // Clicked a cell of non-interest, just clear the piece to move
          piece_to_move = null;
-         regular_moves = [];
-         jump_moves = [];
       }
    });
    
+   // Handle clicking of the new game button
    $("#new_game_button").click(function()
    {
       new_game();
    });
 
+   // Handle clicking of the ready button
    $("#ready_button").click(function()
    {
       var player_name = $("#player_name").val();
@@ -86,6 +93,7 @@ $(document).ready(function()
       add_player(player_name, player_color);
    });
 
+   // Handle clicking the join game button
    $("#join_game_button").click(function()
    {
       join_game();
@@ -109,18 +117,22 @@ function move_piece(piece, row, col)
       var piece_name = move.piece_name
       var dest_row = move.dest_row;
       var dest_col = move.dest_col;
+      
+      // Get the piece to be moved and remove it from the board
+      var piece = board[move.src_row][move.src_col];
+      board[piece.row][piece.col] = null;
+      
+      // Move piece's row and col
+      piece.row = dest_row;
+      piece.col = dest_col;
 
-      for(var i=0; i<pieces.length; i++)
-      {
-         if(pieces[i]["name"] == piece_name)
-         {
-            pieces[i]["row"] = dest_row;
-            pieces[i]["col"] = dest_col;
-            refresh_board();
-            break;
-         }
-      }
+      // Reinsert the piece in the new location
+      board[piece.row][piece.col] = piece;
 
+      // Refresh the board
+      refresh_board();
+
+      // Update the turn
       update_turn(json["turn"]);
    });
 }
@@ -421,7 +433,22 @@ function clean_game()
    piece_to_move = null;
    refresh = 0;
    last_move_number = 0;
+}
 
+// Nulls out the board
+function clean_board()
+{
+   board = [];
+
+   for(var i = 0; i < 8; i++)
+   {
+      row = [];
+      for(var j = 0; j < 8; j++)
+      {
+         row.push(null);
+      }
+      board.push(row);
+   }
 }
 
 function setup_board(game_id)
@@ -430,6 +457,16 @@ function setup_board(game_id)
    {
       var json = jQuery.parseJSON(data);
       pieces = json["board"]["pieces"];
+
+      clean_board();
+      pieces.forEach(function(piece)
+      {
+         row = piece.row
+         col = piece.col
+         board[piece.row][piece.col] = piece;
+      });
+
+      console.log(board);
       
       refresh_board();
    });
@@ -466,55 +503,43 @@ function refresh_board()
 }
 
 // Finds all possible moves from a certain position
-// Returns array containing two other arrays
-// The first array is a list of valid non-capture moves
-// The second array is a list of valid capture moves
 function get_valid_moves(color, row, col)
 {
-   var possible_moves = [];
-   var reg_moves = [];
-   var capture_moves = [];
+   var possible_locations = [];
+   var valid_moves = [];
 
-   possible_moves.push([row-1,col-1]);
-   possible_moves.push([row-1,col+1]);
-   possible_moves.push([row+1,col-1]);
-   possible_moves.push([row+1,col+1]);
+   // Prime with coords to move to in each diagonal direction
+   possible_locations.push([row-1,col-1]);
+   possible_locations.push([row-1,col+1]);
+   possible_locations.push([row+1,col-1]);
+   possible_locations.push([row+1,col+1]);
 
-   var opponent = "";
-
-   if(color == "red")
+   // For each possible move location
+   possible_locations.forEach(function(move)
    {
-      opponent = "black";
-   }
-   else
-   {
-      opponent = "red";
-   }
+      // Check for a piece there
+      var piece = board[row][col]
 
-   possible_moves.forEach(function(move)
-   {
-      if(find_piece(opponent,move[0],move[1]) !== null)
+      // If there is an opponent piece there
+      if(piece !== null && piece.color != player_color)
       {
-
+         // Check to see if we can jump it
          var jump_move = [(move[0]-row)*2 + row, (move[1]-col)*2 + col];
-         console.log("possible jump move from " + row + "," + col + " to " + jump_move[0] + "," + jump_move[1]);
-         if(find_piece(color,jump_move[0],jump_move[1]) === null && find_piece(opponent,jump_move[0],jump_move[1]) === null)
+
+         if(board[jump_move[0]][jump_move[1]] === null)
          {
-            
-            capture_moves.push(jump_move);
-         }
-         else
-         {
-            console.log("jump move is invalid");
+            // We can jump to it, add the jump move
+            valid_moves.push({"type":"jump", "x":jump_move[0], "y":jump_move[1]});
          }
       }
-      else if(find_piece(color, move[0], move[1]) === null)
+      else if(board[move[0]][move[1]] === null)
       {
-         reg_moves.push(move);
+         // If the space is free add a normal move
+         valid_moves.push({"type":"normal", "x":move[0], "y":move[1]});
       }
    });
 
-   return [reg_moves, capture_moves];
+   return valid_moves;
 }
 
 

@@ -2,13 +2,13 @@ from google.appengine.ext import ndb
 import random
 import string
 
-black_checker_positions = [(0, 1), (0, 3), (0, 5), (0, 7), (0, 9),
-                    (1, 0), (1, 2), (1, 4), (1, 6), (1, 8),
-                    (2, 1), (2, 3), (2, 5), (2, 7), (2, 9)]
+black_checker_positions = [(0, 1), (0, 3), (0, 5), (0, 7),
+                    (1, 0), (1, 2), (1, 4), (1, 6),
+                    (2, 1), (2, 3), (2, 5), (2, 7)]
 
-red_checker_positions = [(5, 0), (5, 2), (5, 4), (5, 6), (5, 8),
-                    (6, 1), (6, 3), (6, 5), (6, 7), (6, 9),
-                    (7, 0), (7, 2), (7, 4), (7, 6), (7, 8)]
+red_checker_positions = [(5, 0), (5, 2), (5, 4), (5, 6),
+                    (6, 1), (6, 3), (6, 5), (6, 7),
+                    (7, 0), (7, 2), (7, 4), (7, 6)]
 
 # Class for Pieces
 class Piece(ndb.Model):
