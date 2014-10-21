@@ -30,14 +30,21 @@ $(document).ready(function()
       var $tr = $(this).closest('tr');
       var row = $tr.index();
 
+      // Get the actual cell in the table
+      var table = $("table tbody")[0];
+      var cell = table.rows[row].cells[col]; // This is a DOM "TD" element
+      var $cell = $(cell); // Now it's a jQuery object
+
       // Get the piece at that location on the board
       var piece = board[row][col];
 
       // If there is a piece ready to move and this is a blank space
       if(piece_to_move !== null && piece === null)
       {
+         var move = moves[parseInt($cell.attr("move"))];
+
          // Move it
-         move_piece(piece_to_move,row,col);
+         move_piece(move);
 
          // Clear the piece to move
          piece_to_move = null;
@@ -48,21 +55,23 @@ $(document).ready(function()
          piece_to_move = piece;
 
          // Highlight the square the piece is on
-         var table = $("table tbody")[0];
-         var cell = table.rows[row].cells[col]; // This is a DOM "TD" element
-         var $cell = $(cell); // Now it's a jQuery object
          $cell.addClass("checker-highlight");
 
          // Figure out where that piece can move
          moves = get_valid_moves(player_color,row,col);
          
          // Highlight the squares for each move
-         moves.forEach(function(move)
+         for(var i = 0; i < moves.length; i++)
          {
-            cell = table.rows[move.x].cells[move.y]; // This is a DOM "TD" element
+            // Get the cell
+            cell = table.rows[moves[i].row].cells[moves[i].col]; // This is a DOM "TD" element
             $cell = $(cell); // Now it's a jQuery object.
 
-            if(move.type == "jump")
+            // Add a custom attribute to remember what move is at this cell
+            $cell.attr("move",i);
+
+            // Add highlight class based on type of move
+            if(moves[i].type == "jump")
             {
                $cell.addClass("checker-jump-highlight");
             }
@@ -70,7 +79,7 @@ $(document).ready(function()
             {
                $cell.addClass("checker-highlight");
             }
-         });
+         }
       }
       else
       {
@@ -101,12 +110,18 @@ $(document).ready(function()
    
 });
 
-function move_piece(piece, row, col)
+function move_piece(move)
 {
    var endpoint = "/move?game_id=" + current_game_id;
-   endpoint += "&piece_name=" + piece.name;
-   endpoint += "&dest_row=" + row;
-   endpoint += "&dest_col=" + col;
+   endpoint += "&piece_name=" + move.piece_name;
+   endpoint += "&dest_row=" + move.row;
+   endpoint += "&dest_col=" + move.col;
+
+   if(move.hasOwnProperty("capture"))
+   {
+      alert("capturing " + move.capture);
+      endpoint += "&capture=" + move.capture;
+   }
 
    $.get(endpoint,function(data)
    {
@@ -128,6 +143,9 @@ function move_piece(piece, row, col)
 
       // Reinsert the piece in the new location
       board[piece.row][piece.col] = piece;
+
+      // Update the last move number
+      last_move_number = move.number;
 
       // Refresh the board
       refresh_board();
@@ -518,29 +536,30 @@ function get_valid_moves(color, row, col)
    possible_locations.push([row+1,col-1]);
    possible_locations.push([row+1,col+1]);
 
+   var piece = board[row][col];
+
    // For each possible move location
    possible_locations.forEach(function(move)
    {
       // Check for a piece there
-      var piece = board[move[0]][move[1]]
+      var captured_piece = board[move[0]][move[1]]
 
       // If there is an opponent piece there
-      if(piece !== null && piece.color != player_color)
+      if(captured_piece !== null && captured_piece.color != player_color)
       {
          // Check to see if we can jump it
          var jump_move = [(move[0]-row)*2 + row, (move[1]-col)*2 + col];
 
-         alert("possible jump to " + jump_move[0] + ", " + jump_move[1]);
          if(board[jump_move[0]][jump_move[1]] === null)
          {
             // We can jump to it, add the jump move
-            valid_moves.push({"type":"jump", "x":jump_move[0], "y":jump_move[1]});
+            valid_moves.push({"type":"jump", "piece_name":piece.name,"capture":captured_piece.name,"row":jump_move[0], "col":jump_move[1]});
          }
       }
       else if(board[move[0]][move[1]] === null)
       {
          // If the space is free add a normal move
-         valid_moves.push({"type":"normal", "x":move[0], "y":move[1]});
+         valid_moves.push({"type":"normal", "piece_name":piece.name, "row":move[0], "col":move[1]});
       }
    });
 
