@@ -4,9 +4,9 @@ import string
 
 black_checker_positions = [(0, 1), (0, 3), (0, 5), (0, 7),
                     (1, 0), (1, 2), (1, 4), (1, 6),
-                    (2, 1), (2, 3), (2, 5), (2, 7)]
+                    (2, 1), (2, 3), (3, 5), (2, 7)]
 
-red_checker_positions = [(5, 0), (5, 2), (5, 4), (5, 6),
+red_checker_positions = [(5, 0), (5, 2), (4, 4), (5, 6),
                     (6, 1), (6, 3), (6, 5), (6, 7),
                     (7, 0), (7, 2), (7, 4), (7, 6)]
 
@@ -21,7 +21,7 @@ class Piece(ndb.Model):
 class Move(ndb.Model):
    number = ndb.IntegerProperty()
    piece_name = ndb.StringProperty()
-   captures = ndb.StringProperty()
+   capture = ndb.StringProperty()
    src_row = ndb.IntegerProperty()
    src_col = ndb.IntegerProperty()
    dest_row = ndb.IntegerProperty()
@@ -30,11 +30,11 @@ class Move(ndb.Model):
    # Helper method to create new moves
    # Returns a Move
    @staticmethod
-   def new_move(number,piece_name,src_row,src_col,dest_row,dest_col,captures=""):
+   def new_move(number,piece_name,src_row,src_col,dest_row,dest_col,capture=""):
       move = Move()
       move.number = number
       move.piece_name = piece_name
-      move.captures = captures
+      move.capture = capture
       move.src_row = src_row
       move.src_col = src_col
       move.dest_row = dest_row
@@ -44,18 +44,27 @@ class Move(ndb.Model):
 # Class for Boards
 class Board(ndb.Model):
    pieces = ndb.StructuredProperty(Piece, repeated=True)
+   captured = ndb.StructuredProperty(Piece, repeated=True)
    moves = ndb.StructuredProperty(Move, repeated=True)
 
    # Moves a piece, and stores a Move object to record the move
    # Returns nothing
-   def move_piece(self,piece_name,dest_row,dest_col):
+   def move_piece(self,piece_name,dest_row,dest_col,capture=""):
+            
+      # Note: Removing the captured piece like this creates a new array, which screws with
+      # the reference of the piece to be moved if the piece to be moved is found first
+      # TODO look into different ways to do this, maybe have a 'captured' flag on pieces
+      if capture != "":
+         self.captured.append(self.find_piece_by_name(capture))
+         self.pieces = [piece for piece in self.pieces if piece.name != capture]
+
       piece = self.find_piece_by_name(piece_name)
 
       if piece is None:
          raise Exception("Failed to find piece with name %s" % piece_name)
-            
+
       number = len(self.moves) + 1
-      move = Move.new_move(number,piece_name,piece.row,piece.col,dest_row,dest_col)
+      move = Move.new_move(number,piece_name,piece.row,piece.col,dest_row,dest_col,capture)
 
       piece.row = dest_row
       piece.col = dest_col
@@ -76,8 +85,9 @@ class Board(ndb.Model):
    # Returns a Board
    @staticmethod
    def new_checker_board():
-      board = Board();
-      moves = []
+      board = Board()
+      board.moves = []
+      board.captured = []
       counter = 0
 
       for pos in black_checker_positions:
@@ -149,9 +159,10 @@ class Game(ndb.Model):
 
    # Moves the piece to the destination row and column
    # Returns nothing
-   def move_piece(self,piece_name,dest_row,dest_col):
-      self.board.move_piece(piece_name,dest_row,dest_col)
+   def move_piece(self,piece_name,dest_row,dest_col,capture):
+      self.board.move_piece(piece_name,dest_row,dest_col,capture)
       self.switch_turn()
+      self.put()
 
    # Switches turn between black and red
    # Commits to DB
@@ -161,7 +172,6 @@ class Game(ndb.Model):
          self.turn = "black"
       else:
          self.turn = "red"
-      self.put()
 
    # Helper method to retrieve games by their ID
    # Returns a Game

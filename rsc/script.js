@@ -54,6 +54,8 @@ $(document).ready(function()
          // Save the piece
          piece_to_move = piece;
 
+         alert(piece_to_move.name);
+
          // Highlight the square the piece is on
          $cell.addClass("checker-highlight");
 
@@ -119,7 +121,6 @@ function move_piece(move)
 
    if(move.hasOwnProperty("capture"))
    {
-      alert("capturing " + move.capture);
       endpoint += "&capture=" + move.capture;
    }
 
@@ -127,22 +128,50 @@ function move_piece(move)
    {
       var json = jQuery.parseJSON(data);
 
-      var move = json.move;
+      //var move = json.move;
 
-      var piece_name = move.piece_name
-      var dest_row = move.dest_row;
-      var dest_col = move.dest_col;
+      var piece_name = json.move.piece_name
+      var dest_row = json.move.dest_row;
+      var dest_col = json.move.dest_col;
+
+      console.log("Moving " + json.move.piece_name + " from " + json.move.src_row + " " + json.move.src_col + " to " + dest_row + " " + dest_col);
       
       // Get the piece to be moved and remove it from the board
-      var piece = board[move.src_row][move.src_col];
-      board[piece.row][piece.col] = null;
+      var piece_to_move = board[json.move.src_row][json.move.src_col];
+      board[piece_to_move.row][piece_to_move.col] = null;
+
+      console.log("Moving " + piece_to_move.piece_name);
       
       // Move piece's row and col
-      piece.row = dest_row;
-      piece.col = dest_col;
+      piece_to_move.row = dest_row;
+      piece_to_move.col = dest_col;
 
       // Reinsert the piece in the new location
-      board[piece.row][piece.col] = piece;
+      board[piece_to_move.row][piece_to_move.col] = piece_to_move;
+      
+      console.log("Move request returned with capture: '" + json.move.capture + "'");
+
+      // Perform a capture, if there was one
+      if(json.move.capture !== "")
+      {
+         // Find the captured piece
+         captured_piece = find_piece_by_name(json.move.capture);
+
+         // Remove it from the board
+         board[captured_piece.row][captured_piece.col] = null;
+
+         // Remove it from the pieces array
+         var location = null;
+
+         for(var i = 0; i < pieces.length; i++)
+         {
+            if(pieces[i].name === json.move.capture)
+            {
+               pieces.splice(i,1);
+               break;
+            }
+         }
+      }
 
       // Update the last move number
       last_move_number = move.number;
