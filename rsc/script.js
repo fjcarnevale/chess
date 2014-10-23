@@ -128,47 +128,10 @@ function move_piece(move)
    {
       var json = jQuery.parseJSON(data);
 
-      var piece_name = json.move.piece_name
-      var dest_row = json.move.dest_row;
-      var dest_col = json.move.dest_col;
-
-      console.log("Moving " + json.move.piece_name + " from " + json.move.src_row + " " + json.move.src_col + " to " + dest_row + " " + dest_col);
-      
-      // Get the piece to be moved and remove it from the board
-      var piece_to_move = board[json.move.src_row][json.move.src_col];
-      board[piece_to_move.row][piece_to_move.col] = null;
-      
-      // Move piece's row and col
-      piece_to_move.row = dest_row;
-      piece_to_move.col = dest_col;
-
-      // Reinsert the piece in the new location
-      board[piece_to_move.row][piece_to_move.col] = piece_to_move;
-
-      // Perform a capture, if there was one
-      if(json.move.capture !== "")
-      {
-         // Find the captured piece
-         captured_piece = find_piece_by_name(json.move.capture);
-
-         // Remove it from the board
-         board[captured_piece.row][captured_piece.col] = null;
-
-         // Remove it from the pieces array
-         var location = null;
-
-         for(var i = 0; i < pieces.length; i++)
-         {
-            if(pieces[i].name === json.move.capture)
-            {
-               pieces.splice(i,1);
-               break;
-            }
-         }
-      }
+      parse_move_response(json.move);
 
       // Update the last move number
-      last_move_number = move.number;
+      last_move_number = parseInt(json.move.number);
 
       // Refresh the board
       refresh_board();
@@ -414,46 +377,11 @@ function update_status(game_id)
       // OR pass the move information to a separate method so this and the move function use the same code
       if("last_move" in json && json.last_move.number > last_move_number)
       {
-         var move = json.last_move;
+         // Parse response and perform move
+         parse_move_response(json.last_move);
 
-         var piece_name = move.piece_name
-         var dest_row = move.dest_row;
-         var dest_col = move.dest_col;
-         
-         // Get the piece to be moved and remove it from the board
-         var piece = board[move.src_row][move.src_col];
-         board[piece.row][piece.col] = null;
-         
-         // Move piece's row and col
-         piece.row = dest_row;
-         piece.col = dest_col;
-
-         // Reinsert the piece in the new location
-         board[piece.row][piece.col] = piece;
-
-         // Perform a capture, if there was one
-         if(move.capture !== "")
-         {
-            console.log("Last move captured " + move.capture);
-
-            // Find the captured piece
-            captured_piece = find_piece_by_name(move.capture);
-
-            // Remove it from the board
-            board[captured_piece.row][captured_piece.col] = null;
-
-            // Remove it from the pieces array
-            var location = null;
-
-            for(var i = 0; i < pieces.length; i++)
-            {
-               if(pieces[i].name === move.capture)
-               {
-                  pieces.splice(i,1);
-                  break;
-               }
-            }
-         }
+         // Update the last move number
+         last_move_number = parseInt(json.last_move.number);
 
          // Refresh the board
          refresh_board();
@@ -462,6 +390,46 @@ function update_status(game_id)
          update_turn(json["turn"]);
       }
    });
+}
+
+function parse_move_response(move)
+{
+   var piece_name = move.piece_name
+   var dest_row = move.dest_row;
+   var dest_col = move.dest_col;
+   
+   // Get the piece to be moved and remove it from the board
+   var piece = board[move.src_row][move.src_col];
+   board[piece.row][piece.col] = null;
+   
+   // Move piece's row and col
+   piece.row = dest_row;
+   piece.col = dest_col;
+
+   // Reinsert the piece in the new location
+   board[piece.row][piece.col] = piece;
+
+   // Perform a capture, if there was one
+   if(move.capture !== "")
+   {
+      console.log("Last move captured " + move.capture);
+
+      // Find the captured piece
+      captured_piece = find_piece_by_name(move.capture);
+
+      // Remove it from the board
+      board[captured_piece.row][captured_piece.col] = null;
+
+      // Remove it from the pieces array
+      for(var i = 0; i < pieces.length; i++)
+      {
+         if(pieces[i].name === move.capture)
+         {
+            pieces.splice(i,1);
+            break;
+         }
+      }
+   }
 }
 
 function update_turn(color)
