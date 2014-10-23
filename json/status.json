@@ -16,7 +16,8 @@
       "src_row":"{{move.src_row}}",
       "src_col":"{{move.src_col}}",
       "dest_row":"{{move.dest_row}}",
-      "dest_col":"{{move.dest_col}}"
+      "dest_col":"{{move.dest_col}}",
+      "capture":"{{move.capture}}"
    }
    {% endif %}
 }

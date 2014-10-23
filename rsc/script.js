@@ -128,8 +128,6 @@ function move_piece(move)
    {
       var json = jQuery.parseJSON(data);
 
-      //var move = json.move;
-
       var piece_name = json.move.piece_name
       var dest_row = json.move.dest_row;
       var dest_col = json.move.dest_col;
@@ -139,8 +137,6 @@ function move_piece(move)
       // Get the piece to be moved and remove it from the board
       var piece_to_move = board[json.move.src_row][json.move.src_col];
       board[piece_to_move.row][piece_to_move.col] = null;
-
-      console.log("Moving " + piece_to_move.piece_name);
       
       // Move piece's row and col
       piece_to_move.row = dest_row;
@@ -148,8 +144,6 @@ function move_piece(move)
 
       // Reinsert the piece in the new location
       board[piece_to_move.row][piece_to_move.col] = piece_to_move;
-      
-      console.log("Move request returned with capture: '" + json.move.capture + "'");
 
       // Perform a capture, if there was one
       if(json.move.capture !== "")
@@ -343,7 +337,6 @@ function update_players(game_id)
 {
    $.get("/players?game_id="+game_id, function(data)
    {
-      console.log(data);
       var json = jQuery.parseJSON(data);
       var players = json.players;
       
@@ -394,7 +387,7 @@ function update_players(game_id)
       {
          if(open_spots.indexOf(spot) < 0)
          {
-            console.log("removing " + spot);
+            console.log("Removing player color " + spot);
             $("#player_color option[value='"+spot+"']").remove();
          }
       });
@@ -437,6 +430,30 @@ function update_status(game_id)
 
          // Reinsert the piece in the new location
          board[piece.row][piece.col] = piece;
+
+         // Perform a capture, if there was one
+         if(move.capture !== "")
+         {
+            console.log("Last move captured " + move.capture);
+
+            // Find the captured piece
+            captured_piece = find_piece_by_name(move.capture);
+
+            // Remove it from the board
+            board[captured_piece.row][captured_piece.col] = null;
+
+            // Remove it from the pieces array
+            var location = null;
+
+            for(var i = 0; i < pieces.length; i++)
+            {
+               if(pieces[i].name === move.capture)
+               {
+                  pieces.splice(i,1);
+                  break;
+               }
+            }
+         }
 
          // Refresh the board
          refresh_board();
